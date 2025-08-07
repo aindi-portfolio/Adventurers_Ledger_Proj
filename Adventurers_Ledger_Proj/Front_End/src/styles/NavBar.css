@@ -1,0 +1,20 @@
+.navbar>ul {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    gap: 20px;
+}
+
+.navbar>ul>li {
+    list-style: none;
+}
+
+.navbar>ul>li:hover {
+    background-color: hsla(42, 73%, 51%, 0.69);
+    border-radius: 5px;
+}
+
+.navbar>ul>li a {
+    text-decoration: none;
+    color: inherit; /* This will inherit the color from the parent element */
+}
