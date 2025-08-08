@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/NavBar.css'; 
 
+
 export default function NavBar() {
     return (
         <nav className="navbar">
@@ -19,7 +20,7 @@ export default function NavBar() {
                     <Link to="/settings">Settings</Link>
                 </li>
                 <li>
-                    Login
+                    <Link to="/login_signup">Login</Link>
                 </li>
             </ul>
         </nav>

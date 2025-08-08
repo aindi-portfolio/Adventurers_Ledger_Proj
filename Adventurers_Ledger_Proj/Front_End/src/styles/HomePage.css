@@ -1,17 +1,11 @@
+@import "tailwindcss";
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+    font-family: 'Arial', sans-serif;
 }
-
-.home-header {
-    background-color: hsla(42, 73%, 51%, 0.69);
-    color: rgb(98, 97, 97);
-    padding: 10px;
-    text-align: center;
-}
-
 
 .home-footer {
     background-color: hsla(42, 73%, 51%, 0.69);

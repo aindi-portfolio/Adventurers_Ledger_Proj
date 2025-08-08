@@ -1,14 +1,13 @@
 import React from "react";
 import "../styles/HomePage.css";
+import Header from "../components/Header";
 import NavBar from "../components/NavBar";
 
 function HomePage() {
   return (
     <>
-        <header className="home-header">
-            <h1>Welcome to the Adventurer's Ledger</h1>
-            <NavBar />
-        </header>
+      <Header />
+      <NavBar />  
         <body className="home-body">
         </body>
         <footer className="home-footer">
