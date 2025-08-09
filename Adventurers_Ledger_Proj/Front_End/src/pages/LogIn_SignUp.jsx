@@ -25,6 +25,8 @@ const handleLogIn = async () => {
     };
     await Log_In(userData);
     console.log('Log In Successful');
+    // Redirect to create player page
+    window.location.href = '/create-character';
   } catch (error) {
     console.error('Log In Error:', error);
   }

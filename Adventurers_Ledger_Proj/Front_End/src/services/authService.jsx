@@ -28,8 +28,22 @@ export const Log_In = async (userData) => { // userData has email and password
 };
 
 export const Log_Out = () => {
-    token = Token.objects.get(user=request.user);
+    token = localStorage.getItem(TOKEN_KEY);
     token.delete(); // Delete token from the database
     localStorage.removeItem(TOKEN_KEY); // Remove token from local storage
     Log_Out(request)
+}
+
+export const Create_Character = async (characterData) => {
+    try {
+        const token = localStorage.getItem(TOKEN_KEY);
+        const config = {
+            headers: { Authorization: `Bearer ${token}` } // Include the token in the request headers for authentication
+        };
+        const response = await axios.post(`${API_BASE}/create-player`, characterData, config);
+        return response.data;
+    } catch (error) {
+        console.error('Error during character creation:', error);
+        throw error;
+    }
 }

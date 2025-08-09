@@ -4,12 +4,13 @@ class Player(models.Model):
     """
     Player gets created when a user signs up.
     """
-    user = models.OneToOneField(
+    user_account = models.OneToOneField(
         "user_app.UserAccount", 
         on_delete=models.CASCADE, 
         related_name='player', default=None
     )
     name = models.CharField(max_length=100, unique=True)
+    player_class = models.CharField(max_length=50, default='Adventurer')  # Default class can be changed later
     level = models.IntegerField(default=1)
     experience = models.IntegerField(default=0)
     health = models.IntegerField(default=100)
@@ -21,7 +22,7 @@ class Inventory(models.Model):
     Inventory holds items for a player.
     """
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='inventory')
-    item_name = models.ForeignKey('item_app.Item', on_delete=models.CASCADE, related_name='inventory_items')
+    item = models.ForeignKey('item_app.Item', on_delete=models.CASCADE, related_name='inventory_items')
     quantity = models.IntegerField(default=1)
 
 
