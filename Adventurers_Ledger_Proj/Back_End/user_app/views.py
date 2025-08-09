@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
-from django.core.exceptions import ValidationError
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -36,3 +35,27 @@ class Login(APIView):
             return Response({"user_account": user_account.username, "token": token.key}, status=s.HTTP_200_OK)
         else:
             return Response({"error": "No user matching these credentials"}, status=s.HTTP_404_NOT_FOUND)
+        
+class Logout(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        try:
+            token = Token.objects.get(user=request.user)
+            token.delete()
+            logout(request)
+            return Response(status=s.HTTP_204_NO_CONTENT)
+        except Token.DoesNotExist:
+            return Response({"error": "Token not found"}, status=s.HTTP_400_BAD_REQUEST)
+        
+class User_Profile(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            user_account = UserAccount.objects.get(username=request.user.email)
+            return Response({"email": user_account.email}, status=s.HTTP_200_OK)
+        except UserAccount.DoesNotExist:
+            return Response({"error": "User not found"}, status=s.HTTP_404_NOT_FOUND)

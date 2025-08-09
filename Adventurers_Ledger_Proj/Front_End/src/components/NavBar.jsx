@@ -5,24 +5,24 @@ import '../styles/NavBar.css';
 
 export default function NavBar() {
     return (
-        <nav className="navbar">
+        <div className="navbar">
             <ul>
                 <li>
-                    <Link to="/">Home</Link>
+                    <Link to="/explore">Explore</Link>
                 </li>
                 <li>
-                    <Link to="/characters">Characters</Link>
+                    <Link to="/quests">Quests</Link>
                 </li>
                 <li>
-                    <Link to="/campaigns">Campaigns</Link>
+                    <Link to="/inventory">Inventory</Link>
                 </li>
                 <li>
-                    <Link to="/settings">Settings</Link>
+                    <Link to="/stats">Stats</Link>
                 </li>
                 <li>
                     <Link to="/login_signup">Login</Link>
                 </li>
             </ul>
-        </nav>
+        </div>
     );
 }

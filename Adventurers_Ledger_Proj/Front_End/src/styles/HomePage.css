@@ -6,14 +6,3 @@
     box-sizing: border-box;
     font-family: 'Arial', sans-serif;
 }
-
-.home-footer {
-    background-color: hsla(42, 73%, 51%, 0.69);
-    color: rgb(98, 97, 97);
-    padding: 10px;
-    text-align: center;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-}
