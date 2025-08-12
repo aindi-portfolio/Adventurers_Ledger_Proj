@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'monster_app',
-    'player_app',
+    'character_app',
     'user_app',
     'item_app',
     'shop_app',

@@ -13,7 +13,7 @@ class Quest(models.Model):
 
 
 class Journal(models.Model):
-    player = models.OneToOneField('player_app.Player', on_delete=models.CASCADE, related_name='journal')
+    player = models.OneToOneField('character_app.Character', on_delete=models.CASCADE, related_name='journal')
     entries = models.TextField()
     created_timestamp = models.DateTimeField(auto_now_add=True)
     updated_timestamp = models.DateTimeField(auto_now=True)
@@ -23,8 +23,8 @@ class Journal(models.Model):
     
 
 class PlayerQuest(models.Model):
-    player = models.OneToOneField('player_app.Player', on_delete=models.CASCADE, related_name='player_quests')
-    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, related_name='player_quests')
+    player = models.OneToOneField('character_app.Character', on_delete=models.CASCADE, related_name='character_quests')
+    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, related_name='character_quests')
     status = models.CharField(max_length=50, choices=[
         ('not_started', 'Not Started'),
         ('in_progress', 'In Progress'),

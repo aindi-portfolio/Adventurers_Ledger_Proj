@@ -1,12 +1,14 @@
-from .models import Player, Inventory, Transaction
+from .models import Character, Inventory, Transaction
+from user_app.serializers import UserAccountSerializer
 from item_app.serializers import ItemSerializer
 from django.core.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer
 
-class PlayerSerializer(ModelSerializer):
+class CharacterSerializer(ModelSerializer):
+    # user_account = UserAccountSerializer(read_only=True)
     class Meta:
-        model = Player
-        fields = '__all__'
+        model = Character
+        fields = ["name", "character_class", "level", "experience", "health", "gold"]
 
     # def validate(self, data):
     #     if data['level'] < 1:
@@ -16,9 +18,9 @@ class PlayerSerializer(ModelSerializer):
     #     return data
 
 class InventorySerializer(ModelSerializer):
+    player = CharacterSerializer(read_only=True)
+    item = ItemSerializer(read_only=True)
     class Meta:
-        player = PlayerSerializer(read_only=True)
-        item = ItemSerializer(read_only=True)
         model = Inventory
         fields = '__all__'
 

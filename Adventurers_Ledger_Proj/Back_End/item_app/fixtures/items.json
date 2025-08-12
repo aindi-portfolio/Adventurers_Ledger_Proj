@@ -1,0 +1,50 @@
+[
+    {
+        "model": "item_app.item",
+        "pk": 1,
+        "fields": {
+            "name": "Sword of Truth",
+            "item_type": "weapon",
+            "effect": "+10 Attack",
+            "description": "A legendary sword that grants the wielder immense power.",
+            "is_starter": true,
+            "image_url": ".fixtures/sword_of_truth.jpeg"
+        }
+    },
+    {
+        "model": "item_app.item",
+        "pk": 2,
+        "fields": {
+            "name": "Shield of Valor",
+            "item_type": "armor",
+            "effect": "+5 Defense",
+            "description": "A sturdy shield that protects against the fiercest attacks.",
+            "is_starter": false,
+            "image_url": ".fixtures/shield_of_valor.jpeg"
+        }
+    },
+    {
+        "model": "item_app.item",
+        "pk": 3,
+        "fields": {
+            "name": "Greater Healing Potion",
+            "item_type": "potion",
+            "effect": "Restores 50 HP",
+            "description": "A potion that heals wounds and restores health.",
+            "is_starter": true,
+            "image_url": ".fixtures/healing_potion.jpeg"
+        }
+    },
+    {
+        "model": "item_app.item",
+        "pk": 4,
+        "fields": {
+            "name": "Mystic Amulet",
+            "item_type": "misc",
+            "effect": "+5 Magic Resistance",
+            "description": "An amulet that enhances the wearer's magical defenses.",
+            "is_starter": false,
+            "image_url": ".fixtures/mystic_amulet.jpeg"
+        }
+    }
+]

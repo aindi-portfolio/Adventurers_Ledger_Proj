@@ -1,16 +1,16 @@
 from django.db import models
 
-class Player(models.Model):
+class Character(models.Model):
     """
-    Player gets created when a user signs up.
+    character gets created when a user signs up.
     """
-    user_account = models.OneToOneField(
+    user_account = models.ForeignKey(
         "user_app.UserAccount", 
         on_delete=models.CASCADE, 
-        related_name='player', default=None
+        related_name='character', default=None
     )
     name = models.CharField(max_length=100, unique=True)
-    player_class = models.CharField(max_length=50, default='Adventurer')  # Default class can be changed later
+    character_class = models.CharField(max_length=50, default='Adventurer')  # Default class can be changed later
     level = models.IntegerField(default=1)
     experience = models.IntegerField(default=0)
     health = models.IntegerField(default=100)
@@ -19,9 +19,9 @@ class Player(models.Model):
 
 class Inventory(models.Model):
     """
-    Inventory holds items for a player.
+    Inventory holds items for a character.
     """
-    player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='inventory')
+    character = models.ForeignKey(Character, on_delete=models.CASCADE, related_name='inventory')
     item = models.ForeignKey('item_app.Item', on_delete=models.CASCADE, related_name='inventory_items')
     quantity = models.IntegerField(default=1)
 
@@ -30,7 +30,7 @@ class Transaction(models.Model):
     """
     Transaction records the details of an item purchase.
     """
-    player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='transactions')
+    character = models.ForeignKey(Character, on_delete=models.CASCADE, related_name='transactions')
     transaction_type = models.CharField(max_length=50, choices=[('purchase', 'Purchase'), ('sale', 'Sale')], default='purchase') # Will need addtional integration
     item = models.ForeignKey('item_app.Item', on_delete=models.CASCADE, related_name='transactions')
     quantity = models.IntegerField(default=1)

@@ -13,15 +13,20 @@ from .serializers import UserAccountSerializer, UserAccount
 # Create your views here.
 class Sign_Up(APIView):
     def post(self, request):
-        data = request.data.copy() # {email, password}
-        data["username"] = data["email"]
-        new_user_account = UserAccountSerializer(data=data)
-        if new_user_account.is_valid():
-            new_user_account.save()
-            token_object = Token.objects.create(user=new_user_account)
-            return Response({"client": new_user_account.username, "token": token_object.key}, status=s.HTTP_201_CREATED)
-        else:
-            return Response(new_user_account.errors, status=s.HTTP_400_BAD_REQUEST)
+        try:
+            data = request.data.copy() # {email, password}
+            data["username"] = data["email"]
+            new_user_account = UserAccountSerializer(data=data)
+            if new_user_account.is_valid():
+                new_user_account= new_user_account.save()
+                token = Token.objects.create(user=new_user_account)
+                return Response({"client": new_user_account.username, "token": token.key}, status=s.HTTP_201_CREATED)
+            else:
+                print(new_user_account.errors)
+                return Response(new_user_account.errors, status=s.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print("Unhandled exception:", str(e))
+            return Response({"Error": "Internal server error"}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class Login(APIView):
     def post(self, request):

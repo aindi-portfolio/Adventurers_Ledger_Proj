@@ -9,8 +9,8 @@ function HomePage() {
     <>
       <Header />
       <NavBar />  
-        <body className="home-body">
-        </body>
+        <div className="home-body">
+        </div>
       <Footer />
     </>
   );

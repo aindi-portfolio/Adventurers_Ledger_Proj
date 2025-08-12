@@ -1,12 +1,63 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import '../styles/NavBar.css'; 
-
+import '../styles/NavBar.css';
+import Button from './Button';
+import InputField from './InputField';
+import { Sign_Up, Log_In, Log_Out } from '../services/authServices';
+import SeedEquipmentButton from './SeedEquipmentButton';
 
 export default function NavBar() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleSignUp = async () => {
+      try {
+        const userData = {
+          email: email,
+          password: password
+        };
+        if (!userData.email || !userData.password) {
+          alert('Please fill out all fields.');
+          return;
+        }
+        await Sign_Up(userData);
+        console.log('Sign Up Successful');
+      } catch (error) {
+        console.error('Sign Up Error:', error);
+      }
+    }
+  
+  const handleLogIn = async () => {
+      try {
+        const userData = {
+          email: email,
+          password: password
+        };
+        if (!userData.email || !userData.password) {
+          alert('Please fill out all fields.');
+          return;
+        }
+        console.log("Logging in with:", email, password);
+        await Log_In(userData);
+        console.log('Log In Successful');
+        // Redirect to create player page
+        window.location.href = '/create-character';
+      } catch (error) {
+        console.error('Log In Error:', error);
+      }
+    }
+
+    useEffect(() => {
+      const token = localStorage.getItem('authToken');
+      setIsAuthenticated(!!token);
+    }, []);
+
     return (
         <div className="navbar">
             <ul>
+                <SeedEquipmentButton />
                 <li>
                     <Link to="/explore">Explore</Link>
                 </li>
@@ -20,8 +71,28 @@ export default function NavBar() {
                     <Link to="/stats">Stats</Link>
                 </li>
                 <li>
-                    <Link to="/login_signup">Login</Link>
+                    <Link to="/shop">Shop</Link>
                 </li>
+                { !isAuthenticated ? (
+                    <div style={{ color: 'black' }}>
+                    <form className='' onSubmit={(e) => e.preventDefault()}>
+                      <InputField type='email' value={email} placeholder='email' className='text-center' onChange={(e) => setEmail(e.target.value)}/>
+                    <br />
+                      <InputField type="password" value={password} placeholder='password' className='text-center' onChange={(e) => setPassword(e.target.value)}/>
+                    <br />
+                    <Button onClick={handleLogIn}>Log In</Button>
+                    <br />
+                    <Button onClick={handleSignUp}>Sign Up</Button>
+                    </form>
+                  </div> /* This will render the login/signup form */
+                ) : (
+                    <li>
+                        <Button onClick={() => {
+                            Log_Out();
+                            setIsAuthenticated(false);
+                        }}>Log Out</Button>
+                    </li>
+                )}
             </ul>
         </div>
     );
