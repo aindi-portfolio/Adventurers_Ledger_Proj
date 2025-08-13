@@ -1,0 +1,103 @@
+[
+    {
+      "model": "quest_app.quest",
+      "fields": {
+        "title": "Explore the Whispering Woods",
+        "description": "Strange sounds have been reported deep in the forest. Venture into the woods and uncover what lies beyond the trees.",
+        "difficulty": "easy",
+        "reward_item": "Explorer's Boots",
+        "reward_experience": 100
+      }
+    },
+    {
+      "model": "quest_app.quest",
+      "fields": {
+        "title": "Investigate the Ruined Tower",
+        "description": "A once-abandoned tower now glows with arcane energy. Investigate its halls and report your findings.",
+        "difficulty": "medium",
+        "reward_item": "Arcane Lens",
+        "reward_experience": 150
+      }
+    },
+    {
+      "model": "quest_app.quest",
+      "fields": {
+        "title": "Rescue the Trapped Merchant",
+        "description": "A traveling merchant has gone missing near the canyon pass. Find and escort them back to safety.",
+        "difficulty": "medium",
+        "reward_item": "Merchant's Gratitude Token",
+        "reward_experience": 180
+      }
+    },
+    {
+      "model": "quest_app.quest",
+      "fields": {
+        "title": "Retrieve the Stolen Relic",
+        "description": "A sacred relic was stolen from the temple. Track its trail and recover it before it’s lost forever.",
+        "difficulty": "hard",
+        "reward_item": "Relic of the Ancients",
+        "reward_experience": 250
+      }
+    },
+    {
+      "model": "quest_app.quest",
+      "fields": {
+        "title": "Scout the Northern Ridge",
+        "description": "The northern ridge has become inaccessible due to landslides. Scout the area and mark safe paths for future travelers.",
+        "difficulty": "easy",
+        "reward_item": "Surveyor's Map",
+        "reward_experience": 90
+      }
+    },
+    {
+      "model": "quest_app.quest",
+      "fields": {
+        "title": "Secure the Abandoned Outpost",
+        "description": "An old outpost has been overrun by unknown forces. Secure the perimeter and prepare it for reoccupation.",
+        "difficulty": "hard",
+        "reward_item": "Outpost Banner",
+        "reward_experience": 220
+      }
+    },
+    {
+      "model": "quest_app.quest",
+      "fields": {
+        "title": "Deliver Supplies to the Frontier",
+        "description": "Frontier settlers are running low on supplies. Deliver the package and ensure it reaches them safely.",
+        "difficulty": "medium",
+        "reward_item": "Frontier Medal",
+        "reward_experience": 160
+      }
+    },
+    {
+      "model": "quest_app.quest",
+      "fields": {
+        "title": "Map the Forgotten Caverns",
+        "description": "The caverns beneath the hills remain unmapped. Explore their depths and chart a safe route.",
+        "difficulty": "medium",
+        "reward_item": "Cavern Compass",
+        "reward_experience": 140
+      }
+    },
+    {
+      "model": "quest_app.quest",
+      "fields": {
+        "title": "Protect the Village Festival",
+        "description": "The village is preparing for its annual festival. Guard the area and ensure the celebration goes uninterrupted.",
+        "difficulty": "easy",
+        "reward_item": "Festival Charm",
+        "reward_experience": 110
+      }
+    },
+    {
+      "model": "quest_app.quest",
+      "fields": {
+        "title": "Recover the Lost Scout",
+        "description": "A scout sent to monitor the border has not returned. Retrace their path and bring them home.",
+        "difficulty": "hard",
+        "reward_item": "Scout's Signal Flare",
+        "reward_experience": 240
+      }
+    }
+  ]
+  

@@ -23,10 +23,5 @@ urlpatterns = [
     path('api/user/', include('user_app.urls')),
     path('api/character/', include('character_app.urls')),
     path('api/items/', include('item_app.urls')),
-    # path('api/players/', include('player_app.urls')),
-    # path('api/monsters/', include('monster_app.urls')),
-    # path('api/battles/', include('battle_app.urls')),
-    # path('api/quests/', include('quest_app.urls')),
-    # path('api/shops/', include('shop_app.urls')),
-    # path('api/transactions/', include('transaction_app.urls')),
+    path('api/quests/', include('quest_app.urls')),
 ]
