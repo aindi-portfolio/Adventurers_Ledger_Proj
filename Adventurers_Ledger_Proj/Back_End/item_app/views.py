@@ -58,7 +58,6 @@ class SeedWeaponsView(APIView):
                 defaults={
                     "item_type": "weapon",
                     "description": description,
-                    "effect": damage_dice,
                     "damage": damage_avg or 0,
                 }
             )
@@ -107,8 +106,7 @@ class SeedArmorView(APIView):
                 defaults={
                     "item_type": "armor",
                     "description": description,
-                    "effect": f"AC {armor_class}",
-                    "damage": 0,
+                    "armor_class": {armor_class} or 0,
                 }
             )
             seeded_items.append(item)
