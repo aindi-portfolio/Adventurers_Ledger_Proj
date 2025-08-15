@@ -40,6 +40,7 @@ class GenQuestView(APIView):
         quest_title = request.data.get("quest_title")
         quest_description = request.data.get("quest_description")
         
+        # Build the prompt for the LLM
         prompt = f"""
         Based on the following quest:
         Title: {quest_title}
@@ -101,46 +102,71 @@ class AdvanceQuestView(APIView):
 
     def post(self, request):
         OPENROUTER_API_KEY = os.environ.get("DEEPSEEK_FREE")  # Update your .env key name
-        quest_title = request.data.get("quest_title")
-        quest_description = request.data.get("quest_description")
-        history = request.data.get("history", [])
-        player_choice = request.data.get("choice")
+        
+        print("Incoming Payload:", request.data)
+        quest_data = request.data.get("quest") # This is the response from GenQuestView
+        player_choice = request.data.get("choice") # player's choice to advance the quest
 
-        if not quest_title or not quest_description or not player_choice:
-            return Response({"error": "Missing required fields."}, status=s.HTTP_400_BAD_REQUEST)
+        if not quest_data or not player_choice:
+            print(f"-------Missing quest data or player choice. Error: {s.HTTP_400_BAD_REQUEST}-------")
+            return Response({"error": "Missing required fields."}, status=s.HTTP_400_BAD_REQUEST) # Edge case
 
-        # Build prompt
-        prompt = f"""The player begins the quest: {quest_title}. {quest_description} Without breaking the immersion, give 
-        me one line for what happens when the player makes that choice. Then give two (one word) options that will drive the story to a successful or failed end."""
-        for i, entry in enumerate(history):
-            prompt += f"Round {i+1}:\nPlayer chooses: {entry['choice']}\nResult: {entry['response']}\n"
-        prompt += f"Player chooses: {player_choice}\n"
+        # Extract quest title and description
+        title = quest_data.get("title")
+        description = quest_data.get("description")
+        decision_point = quest_data.get("decision_point")
+        choices = quest_data.get("choices")
 
-        response = requests.post(
-            url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json"
-            },
-            data=json.dumps({
-                "model": "deepseek/deepseek-r1-0528:free",
-                "messages": [{"role": "user", "content": prompt}]
-            })
-        )
+        if not title or not description or not decision_point or not choices:
+            return Response({"error": "Incomplete quest structure."}, status=s.HTTP_400_BAD_REQUEST)
 
-        if response.status_code != 200:
-            return Response({"error": "LLM failed"}, status=s.HTTP_502_BAD_GATEWAY)
+        # Build prompt so the LLM responds in JSON format with desired structure
+        prompt = f"""
+        Quest Title: {title}
+        Quest Description: {description}
+        Decision Point: {decision_point}
+        Player Choice: {player_choice}
 
-        content = response.json()["choices"][0]["message"]["content"]
+        Based on this choice, return a JSON object with the final outcome of the quest. Use this format:
+        {{
+            "outcome": "success" or "failure",
+            "summary": "A one-line immersive description of what happens as a result of the player's choice."
+            "health_change": "integer",
+            "gold_change": "integer",
+            "quest_complete": "boolean"
+        }}
 
-        # Detect ending
-        is_complete = "quest is complete" in content.lower() or "quest failed" in content.lower()
-        outcome = "success" if "complete" in content.lower() else "failure" if "failed" in content.lower() else None
+        Do not include any extra text or explanation. Just return the JSON object.
+        """
 
-        return Response({
-            "response": content,
-            "choices": ["Option A", "Option B"],  # You can parse these from content later
-            "is_complete": is_complete,
-            "outcome": outcome
-        }, status=s.HTTP_200_OK)
+        print(f"Prompt for LLM: {prompt}") # Debugging line to see the prompt sent to the LLM
+        
+        try:
+            response = requests.post(
+                url="https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                data=json.dumps({
+                    "model": "deepseek/deepseek-r1-0528:free",
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ]
+                })
+            )
 
+            if response.status_code != 200:
+                return Response({"error": "------------LLM failed-------------"}, status=s.HTTP_502_BAD_GATEWAY)
+
+            content = response.json()["choices"][0]["message"]["content"]
+            print(f"LLM response: {content}")
+        
+            final_result = json.loads(content)  # Convert the string to a JSON object
+            return Response({"result": final_result}, status=s.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({"error": f"--------LLM request failed: {str(e)}------------"}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
