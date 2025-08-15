@@ -5,34 +5,44 @@ import os
 from dotenv import load_dotenv
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status as s
 from .models import Quest
 from .serializers import QuestSerializer
 
 load_dotenv('.env')  # Load environment variables
 
-class ExploreQuestView(APIView):
+
+# QuestView: A view to handle quest retrieval from the DB
+class QuestView(APIView):
     """
     GET /explore-quest/
-    Returns a random quest and a story intro from OpenRouter.
+    Returns a random quest and a story from OpenRouter.
     """
 
     def get(self, request):
-        quests = Quest.objects.all()
+        quests = Quest.objects.all() # These 'quests' is a QuerySet of all quests in the DB
         if not quests.exists():
-            return Response({"error": "No quests available."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "No quests available."}, status=s.HTTP_404_NOT_FOUND)
 
-        OPENROUTER_API_KEY = os.environ.get("DEEPSEEK_FREE")  # Update your .env key name
-        # 🎲 Select a random quest
-        quest = random.choice(quests)
+        # Select a random quest
+        quest = random.choice(quests) # This 'quest' is a single Quest object from the DB
         serializer = QuestSerializer(quest)
         print(f"Selected quest: {quest.title}\nDescription: {quest.description}")
-        # 🧠 Generate story intro using OpenRouter
-        if not OPENROUTER_API_KEY:
-            return Response({"error": "Missing OpenRouter API key."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"quest": serializer.data}, status=s.HTTP_200_OK)
 
-        prompt = f"""The player begins the quest: {quest.title}. {quest.description} Without breaking the immersion, give 
-        me a maximum two lines for what happens when the player begins the quest. Then give two options,'Yes' or 'No', for what the player will do next."""
+        
+# GenQuestView: Takes a quest title and description and submits it to the LLM to generate a quest.
+class GenQuestView(APIView):
+    def post(self, request):
+        # Generate story intro using OpenRouter
+        OPENROUTER_API_KEY = os.environ.get("DEEPSEEK_FREE")  # Update your .env key name
+
+        quest_title = request.data.get("quest_title")
+        quest_description = request.data.get("quest_description")
+        
+        prompt = f"""The player begins the quest: {quest_title}. {quest_description}. Give 
+        me one line of text for the player coming to a decision point with two, one word, options (like 'Yes' or 'No') to return to React front-end.
+        This will end the quest and drive the story to a successful or failed state."""
 
         try:
             response = requests.post(
@@ -55,19 +65,17 @@ class ExploreQuestView(APIView):
             )
 
             if response.status_code != 200:
-                return Response({"error": "LLM failed to generate story."}, status=status.HTTP_502_BAD_GATEWAY)
+                return Response({"error": "LLM failed to generate story."}, status=s.HTTP_502_BAD_GATEWAY)
 
-            story = response.json()["choices"][0]["message"]["content"]
+            quest = response.json()["choices"][0]["message"]["content"] # This 'quest' is the generated story
+            print(f"Generated story: {quest}")
 
         except Exception as e:
-            return Response({"error": f"LLM request failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": f"LLM request failed: {str(e)}"}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # ✅ Return quest + story
-        return Response({
-            "quest": serializer.data,
-            "story_intro": story
-        }, status=status.HTTP_200_OK)
-
+        # Return story
+        
+        return Response({"quest": quest}, status=s.HTTP_200_OK)
 
 class AdvanceQuestView(APIView):
     """
@@ -83,7 +91,7 @@ class AdvanceQuestView(APIView):
         player_choice = request.data.get("choice")
 
         if not quest_title or not quest_description or not player_choice:
-            return Response({"error": "Missing required fields."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Missing required fields."}, status=s.HTTP_400_BAD_REQUEST)
 
         # Build prompt
         prompt = f"""The player begins the quest: {quest_title}. {quest_description} Without breaking the immersion, give 
@@ -105,7 +113,7 @@ class AdvanceQuestView(APIView):
         )
 
         if response.status_code != 200:
-            return Response({"error": "LLM failed"}, status=status.HTTP_502_BAD_GATEWAY)
+            return Response({"error": "LLM failed"}, status=s.HTTP_502_BAD_GATEWAY)
 
         content = response.json()["choices"][0]["message"]["content"]
 
@@ -118,4 +126,5 @@ class AdvanceQuestView(APIView):
             "choices": ["Option A", "Option B"],  # You can parse these from content later
             "is_complete": is_complete,
             "outcome": outcome
-        }, status=status.HTTP_200_OK)
+        }, status=s.HTTP_200_OK)
+

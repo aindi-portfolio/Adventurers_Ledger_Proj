@@ -12,13 +12,16 @@ const ExplorePage = () => {
   const [isComplete, setIsComplete] = useState(false);
   const [outcome, setOutcome] = useState(null);
 
-  // 🔄 Fetch initial quest + story intro
+  const API_BASE = 'http://localhost:8000/api';
+
+  // Fetch initial quest + story intro
   useEffect(() => {
     const fetchQuest = async () => {
       try {
-        const res = await axios.get("/explore-quest/");
+        const res = await axios.get(`${API_BASE}/quests/explore-quest`);
         setQuest(res.data.quest);
         setStoryIntro(res.data.story_intro);
+        console.log("Fetched story intro:", storyIntro);
       } catch (err) {
         console.error("Failed to fetch quest:", err);
       }
@@ -27,14 +30,14 @@ const ExplorePage = () => {
     fetchQuest();
   }, []);
 
-  // 🧠 Handle player choice
+  // Handle player choice
   const handleChoice = async (choice) => {
     if (!quest) return;
 
     setLoading(true);
 
     try {
-      const res = await axios.post("/advance-quest/", {
+        const res = await axios.post(`${API_BASE}/quests/advance-quest`, {
         quest_title: quest.title,
         quest_description: quest.description,
         history,
@@ -54,7 +57,7 @@ const ExplorePage = () => {
     }
   };
 
-  // 🔁 Restart quest
+  // Restart quest
   const restartQuest = () => {
     setHistory([]);
     setChoices(["Yes", "No"]);
@@ -63,7 +66,7 @@ const ExplorePage = () => {
     setStoryIntro("");
     setQuest(null);
     // Re-fetch a new quest
-    axios.get("/explore-quest/").then((res) => {
+    axios.get(`${API_BASE}/quests/explore-quest`).then((res) => {
       setQuest(res.data.quest);
       setStoryIntro(res.data.story_intro);
     });

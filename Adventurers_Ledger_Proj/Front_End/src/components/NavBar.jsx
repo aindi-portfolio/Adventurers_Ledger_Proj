@@ -4,7 +4,6 @@ import '../styles/NavBar.css';
 import Button from './Button';
 import InputField from './InputField';
 import { Sign_Up, Log_In, Log_Out } from '../services/authServices';
-import SeedEquipmentButton from './SeedEquipmentButton';
 
 export default function NavBar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -57,12 +56,11 @@ export default function NavBar() {
     return (
         <div className="navbar">
             <ul>
-                <SeedEquipmentButton />
                 <li>
                     <Link to="/explore">Explore</Link>
                 </li>
                 <li>
-                    <Link to="/quests">Quests</Link>
+                    <Link to="/quest">Quests</Link>
                 </li>
                 <li>
                     <Link to="/inventory">Inventory</Link>

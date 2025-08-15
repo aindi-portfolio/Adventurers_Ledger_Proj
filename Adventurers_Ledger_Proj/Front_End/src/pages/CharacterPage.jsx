@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import Header from '../components/Header';
 import InputField from '../components/InputField';
+import axios from 'axios';
 
 export default function CharacterPage() {
     // Refs for input fields
@@ -11,20 +12,16 @@ export default function CharacterPage() {
     async function Create_Character(characterData) {
         try {
             const token = localStorage.getItem('authToken');
-            const response = await fetch('http://localhost:8000/api/character/create-character', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Token ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(characterData)
-            });
-            // Check if the response is ok (status in the range 200-299)
-            if (!response.ok) {
-                throw new Error(response.statusText);
-                console.error(response);
-                console.log(response);
-            }
+            const response = await axios.post(
+                'http://localhost:8000/api/character/create-character',
+                characterData,
+                {
+                    headers: {
+                        Authorization: `Token ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
             return response;
         } catch (error) {
             console.error('Error creating character:', error);

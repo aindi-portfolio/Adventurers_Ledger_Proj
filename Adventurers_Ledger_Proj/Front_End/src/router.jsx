@@ -5,7 +5,7 @@ import Inventory from "./pages/InventoryPage.jsx";
 import CharacterPage from "./pages/CharacterPage.jsx";
 import StatsPage from "./pages/StatsPage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
-import ExplorePage from "./pages/ExplorePage.jsx";
+import QuestPage from "./pages/QuestPage.jsx";
 
 
 const router = createBrowserRouter([
@@ -34,8 +34,8 @@ const router = createBrowserRouter([
                 element: <ShopPage />
             },
             {
-                path: "/explore",
-                element: <ExplorePage />
+                path: "/quest",
+                element: <QuestPage />
             }
         ]
     }
