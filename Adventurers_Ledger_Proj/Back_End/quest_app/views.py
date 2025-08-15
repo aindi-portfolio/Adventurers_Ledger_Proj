@@ -40,9 +40,23 @@ class GenQuestView(APIView):
         quest_title = request.data.get("quest_title")
         quest_description = request.data.get("quest_description")
         
-        prompt = f"""The player begins the quest: {quest_title}. {quest_description}. Give 
-        me one line of text for the player coming to a decision point with two, one word, options (like 'Yes' or 'No') to return to React front-end.
-        This will end the quest and drive the story to a successful or failed state."""
+        prompt = f"""
+        Based on the following quest:
+        Title: {quest_title}
+        Description: {quest_description}
+
+        Return a JSON object with the following structure:
+        {
+            {
+            "title": "string",
+            "description": "string",
+            "decision_point": "string",
+            "choices": ["Yes", "No"]
+            }
+        }
+
+        Do not include any explanation or extra text. Just return the JSON object.
+        """
 
         try:
             response = requests.post(
@@ -67,15 +81,17 @@ class GenQuestView(APIView):
             if response.status_code != 200:
                 return Response({"error": "LLM failed to generate story."}, status=s.HTTP_502_BAD_GATEWAY)
 
-            quest = response.json()["choices"][0]["message"]["content"] # This 'quest' is the generated story
-            print(f"Generated story: {quest}")
+            content = response.json()["choices"][0]["message"]["content"] # This 'quest' is the generated story
+            print(f"Generated story: {content}")
+            structured_story = json.loads(content) # Convert the string to a JSON object
+            print(f"Structured story: {structured_story}")
 
         except Exception as e:
             return Response({"error": f"LLM request failed: {str(e)}"}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Return story
         
-        return Response({"quest": quest}, status=s.HTTP_200_OK)
+        return Response({"quest": structured_story}, status=s.HTTP_200_OK)
 
 class AdvanceQuestView(APIView):
     """

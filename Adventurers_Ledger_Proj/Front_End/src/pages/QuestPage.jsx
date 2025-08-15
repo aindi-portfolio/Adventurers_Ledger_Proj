@@ -28,7 +28,7 @@ const QuestPage = () => {
   const fetchGenQuest = async (quest) => {
     try {
       const token = localStorage.getItem("authToken");
-      console.log("quest:", quest); // Debugging line to check quest data
+      console.log("story:", quest); // Debugging line to check quest data
       const res = await axios.post(
         `${API_BASE}/quests/gen-quest`,
         quest,
@@ -91,9 +91,20 @@ const QuestPage = () => {
                 ) : (
                 <>
                 <div className="mt-4">
-                  <h3 className="text-xl font-semibold mb-2">Some time after accepting...</h3>
+                  <h6 className="text-xl font-semibold mb-2">Some time after accepting...</h6>
+                  <h3 className="text-2xl font-bold mb-2">{genQuest.title}</h3>
                   <p>{genQuest.description}</p>
-                  <p className="mt-2">{genQuest}</p>
+                  <p>Decision Point: {genQuest.decision_point}</p>
+                  <button
+                    className="mt-4 px-4 py-2 bg-red-400 text-white rounded"
+                    >
+                      {genQuest.choices[0]}
+                  </button>
+                  <button
+                    className="mt-4 px-4 py-2 bg-red-400 text-white rounded"
+                    >
+                      {genQuest.choices[1]}
+                  </button>
                 </div>
                 </>
                 )
