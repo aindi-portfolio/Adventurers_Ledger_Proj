@@ -6,6 +6,7 @@ import CharacterPage from "./pages/CharacterPage.jsx";
 import StatsPage from "./pages/StatsPage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
 import QuestPage from "./pages/QuestPage.jsx";
+import EncounterPage from "./pages/EncounterPage.jsx";
 
 
 const router = createBrowserRouter([
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
             {
                 path: "/quest",
                 element: <QuestPage />
+            },
+            {
+                path: "/encounter",
+                element: <EncounterPage />
             }
         ]
     }

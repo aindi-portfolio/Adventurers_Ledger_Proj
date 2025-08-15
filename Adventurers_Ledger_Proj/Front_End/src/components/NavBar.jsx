@@ -57,7 +57,7 @@ export default function NavBar() {
         <div className="navbar">
             <ul>
                 <li>
-                    <Link to="/explore">Explore</Link>
+                    <Link to="/encounter">Go to Battle</Link>
                 </li>
                 <li>
                     <Link to="/quest">Quests</Link>
