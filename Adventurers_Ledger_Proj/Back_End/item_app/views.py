@@ -8,6 +8,29 @@ from .utils import get_dice_average
 
 API_BASE_URL = "https://www.dnd5eapi.co"
 
+class GetItemByNameView(APIView):
+    """
+    GET /item-by-name/
+    Fetches item details by name from the D&D API and returns it in JSON format.
+    """
+
+    def get(self, request):
+        item_name = request.query_params.get('name')
+        if not item_name:
+            return Response({"error": "Item name is required."}, status=s.HTTP_400_BAD_REQUEST)
+
+        item_url = f"{API_BASE_URL}/api/2014/equipment/{item_name.lower().replace(' ', '-')}"
+        response = requests.get(item_url)
+
+        if response.status_code != 200:
+            return Response({"error": "Item not found."}, status=s.HTTP_404_NOT_FOUND)
+
+        item_data = response.json()
+        serializer = ItemSerializer(data=item_data)
+        serializer.is_valid(raise_exception=True)
+
+        return Response(serializer.data, status=s.HTTP_200_OK)
+
 class SeedWeaponsView(APIView):
     """
     POST /seed-weapons/
@@ -15,26 +38,7 @@ class SeedWeaponsView(APIView):
     """
 
     def post(self, request):
-        # Check if the Item model is empty and return json response with item data if it is not empty 
-
-        STARTER_ITEMS_FOR_CLASSES = [ # For future class selection, these are the starter item by name (not index in D&D API)
-            {
-                "class": "barbarian",
-                "items": ["Handaxe", "Handaxe", "Chain Mail"] # Future enhancement: let user select class and starting weapon
-            },
-            {
-                "class": "fighter",
-                "items": ["Longsword", "Shield", "Chain Mail"]
-            },
-            {
-                "class": "wizard",
-                "items": ["Quarterstaff", "Spellbook", "Component Pouch"]
-            },
-            {
-                "class": "rogue",
-                "items": ["Shortsword", "Dagger", "Leather Armor"]
-            }
-        ]
+        # Check if the Item model is empty and return json response with item data if it is not empty
 
         EQUIPMENT_CATEGORIES = [
         ('weapon', 'Weapon'), # left is index in D&D API, right is the name of the item

@@ -6,7 +6,7 @@ import axios from 'axios';
 export default function CharacterPage() {
     // Refs for input fields
     const nameRef = useRef(null);
-    const classRef = useRef();
+    const classRef = useRef(null);
 
     // Function to handle character creation
     async function Create_Character(characterData) {
@@ -82,8 +82,9 @@ export default function CharacterPage() {
                     <label htmlFor="characterClass">Character Class:</label>
                     <select ref={classRef} id="characterClass" name="characterClass" required>
                         <option value="" disabled>Select Class</option>
-                        <option value="warrior">Warrior</option>
-                        <option value="mage">Mage</option>
+                        <option value="barbarian">Barbarian</option>
+                        <option value="fighter">Fighter</option>
+                        <option value="wizard">Wizard (in development)</option>
                         <option value="rogue">Rogue</option>
                     </select>
                 </div>
