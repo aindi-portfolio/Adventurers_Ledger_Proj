@@ -4,27 +4,37 @@ from django.db import models
 class Item(models.Model):
     """
     This model represents an item in the game.
-    """
-    ITEM_TYPES = [
+    
+    ITEM_CATEGORIES = [## Refered to as equipment_category in D&D API
         ('weapon', 'Weapon'),
         ('armor', 'Armor'),
-        ('potion', 'Potion'),
         ('misc', 'Miscellaneous'),
+        ('potion', 'Potion'),
+        ('tool', 'Tool'), # index 'tools' in D&D API
+        ('adventuring_gear', 'Adventuring Gear'),
     ]
 
-    name = models.CharField(max_length=100, unique=True, default='Unknown Item')
-    item_type = models.CharField(max_length=50, choices=ITEM_TYPES, default='misc')
+    CURRENCY_CHOICES = [
+        ('cp', 'Copper Pieces'),
+        ('sp', 'Silver Pieces'),
+        ('ep', 'Electrum Pieces'),
+        ('gp', 'Gold Pieces'),
+        ('pp', 'Platinum Pieces'),
+    ]
+    """
+    
 
-    damage = models.IntegerField(default=0)  # Damage value for weapons
+    name = models.CharField(max_length=100, unique=True, default='Unknown Item') # Will be taken from name from D&D API
+    item_category = models.CharField(max_length=50, default='misc') # from equipment_category.name in D&D API
+
+    damage = models.IntegerField(default=0)  # from damage.damage_dice in D&D API
     armor_class = models.IntegerField(default=0)  # Armor class for armor
     healing = models.IntegerField(default=0)  # Healing value for potions
-
-    effect = models.CharField(max_length=100, blank=True, null=True, default='No special effect.')
+    rarity = models.CharField(max_length=50, blank=True, null=True, default='common')
     description = models.TextField(blank=True, null=True, default='No description available.')
 
-    rarity = models.CharField(max_length=50, blank=True, null=True, default='common')
-    source = models.CharField(max_length=50, default='api', blank=True, null=True)
-
+    cost_amount = models.IntegerField(default=0)  # Cost in gold pieces
+    cost_unit = models.CharField(max_length=2, default='gp') # Currency unit, e.g., 'gp' for gold pieces
     is_starter = models.BooleanField(default=False)  # Indicates if this is a starter item
 
     def __str__(self):

@@ -1,29 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import axios from "axios";
-
+import fetchCharacterStats from "../services/FetchStats";
 
 
 export default function StatsPage() {
     const [stats, setStats] = useState(null);
-
-    // Fetch character stats from the backend
-    async function fetchCharacterStats() {
-        try {
-            const token = localStorage.getItem('authToken');
-            const response = await axios.get('http://localhost:8000/api/character/stats', {
-                headers: {
-                    Authorization: `Token ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            console.log("Fetched stats:", response.data); // Handle the fetched stats data
-            setStats(response.data);
-        } catch (error) {
-            console.error('Error fetching character stats:', error);
-        }
-    }
 
     useEffect(() => {
         // Check if the user is authenticated
@@ -34,7 +16,12 @@ export default function StatsPage() {
             window.location.href = '/';
         }
         // Fetch character stats when the component mounts
-        fetchCharacterStats();
+        const fetchStats = async () => {
+            const data = await fetchCharacterStats();
+            console.log("Stats data:", data);
+            setStats(data);
+        };
+        fetchStats();
     }, []);
 
 

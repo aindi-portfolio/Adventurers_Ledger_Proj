@@ -26,14 +26,12 @@ function MysticButton({ onClick, type = 'button', children }) {
     );
 }
 
-function EncounterButton({ onClick, type = 'button', children }) {
+function EncounterButton({ onClick, type = 'button', children, className = '' }) {
     return (
         <button 
             type={type} 
             onClick={onClick} 
-            className={`min-w-20 px-6 py-3 bg-gradient-to-r from-green-700 to-green-500 text-white
-                font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-green-400
-                hover:scale-105 transition-transform duration-200 border-2 border-green-800`}
+            className={`min-w-20 px-6 py-3 ${className}`}
         >
             {children}
         </button>
