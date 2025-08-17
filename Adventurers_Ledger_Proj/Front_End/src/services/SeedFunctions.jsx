@@ -3,19 +3,13 @@ import axios from "axios";
 const SeedItems = async () => {
 
     try {
-    const response_weapons = await axios.post("http://localhost:8000/api/items/seed-weapons", {}, {
+    const response = await axios.post("http://localhost:8000/api/items/seed", {}, {
         headers: {
         Authorization: `Token ${localStorage.getItem("authToken")}`,
         "Content-Type": "application/json",
         },
     });
-
-    const response_armor = await axios.post("http://localhost:8000/api/items/seed-armor", {}, {
-        headers: {
-        Authorization: `Token ${localStorage.getItem("authToken")}`,
-        "Content-Type": "application/json",
-        },
-    });
+    console.log("Items seeded:", response.data);
     } catch (err) {
         console.error("Error seeding items:", err);
     }

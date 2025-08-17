@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import Header from '../components/Header';
-import InputField from '../components/InputField';
 import axios from 'axios';
 
 export default function CharacterPage() {
@@ -44,7 +43,7 @@ export default function CharacterPage() {
         }
     
         const characterData = {
-            name,
+            name: name,
             character_class: characterClass
         };
     

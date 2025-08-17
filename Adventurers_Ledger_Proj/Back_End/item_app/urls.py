@@ -1,7 +1,6 @@
 from django.urls import path
-from .views import SeedWeaponsView, SeedArmorView
+from .views_EXPERIMENTAL import SeedItemsView
 
 urlpatterns = [
-    path("seed-weapons", SeedWeaponsView.as_view(), name="seed-weapons"),
-    path("seed-armor", SeedArmorView.as_view(), name="seed-armor"),
+    path("seed", SeedItemsView.as_view(), name="seed"),
 ]

@@ -1,0 +1,95 @@
+import asyncio
+import aiohttp
+from django.db import transaction
+import requests
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status as s
+from .models import Item
+from .serializers import ItemSerializer
+from .utils_EXPERIMENTAL import get_dice_average
+
+API_BASE_URL = "https://www.dnd5eapi.co"
+
+class GetItemByNameView(APIView):
+    """
+    GET /item-by-name/
+    Fetches item details by name from the D&D API and returns it in JSON format.
+    """
+
+    def get(self, request):
+        item_name = request.query_params.get('name')
+        if not item_name:
+            return Response({"error": "Item name is required."}, status=s.HTTP_400_BAD_REQUEST)
+
+        item_url = f"{API_BASE_URL}/api/2014/equipment/{item_name.lower().replace(' ', '-')}"
+        response = requests.get(item_url)
+
+        if response.status_code != 200:
+            return Response({"error": "Item not found."}, status=s.HTTP_404_NOT_FOUND)
+
+        item_data = response.json()
+        serializer = ItemSerializer(data=item_data)
+        serializer.is_valid(raise_exception=True)
+
+        return Response(serializer.data, status=s.HTTP_200_OK)
+
+
+class SeedItemsView(APIView):
+    def post(self, request):
+        EQUIPMENT_CATEGORIES = ['weapon', 'armor', 'potion', 'tools']
+        existing_items = set(Item.objects.values_list('name', flat=True))
+        new_items = []
+
+        async def fetch_item_detail(session, url):
+            async with session.get(url) as resp:
+                if resp.status != 200:
+                    return None
+                return await resp.json()
+
+        async def fetch_all_items():
+            async with aiohttp.ClientSession() as session:
+                tasks = []
+                for category in EQUIPMENT_CATEGORIES:
+                    category_url = f"{API_BASE_URL}/api/2014/equipment-categories/{category}"
+                    async with session.get(category_url) as resp:
+                        if resp.status != 200:
+                            continue
+                        data = await resp.json()
+                        for item_ref in data.get("equipment", []):
+                            item_url = f"{API_BASE_URL}{item_ref['url']}"
+                            tasks.append(fetch_item_detail(session, item_url))
+                return await asyncio.gather(*tasks)
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        item_details = loop.run_until_complete(fetch_all_items())
+
+        for detail in item_details:
+            if not detail:
+                continue
+            name = detail.get("name")
+            if name in existing_items:
+                continue
+
+            damage_dice = detail.get("damage", {}).get("damage_dice") if "damage" in detail else None
+            damage_avg = get_dice_average(damage_dice) if damage_dice else 0
+
+            new_items.append(Item(
+                name=name,
+                item_category=detail.get("equipment_category", {}).get("name", "misc"),
+                damage=damage_avg,
+                armor_class=detail.get("armor_class", {}).get("base", 0),
+                healing=0,
+                rarity=detail.get("rarity", {}).get("name", "common"),
+                description=" ".join(detail.get("desc", [])) if isinstance(detail.get("desc"), list) else detail.get("desc", ""),
+                cost_amount=detail.get("cost", {}).get("quantity", 0),
+                cost_unit=detail.get("cost", {}).get("unit", "gp"),
+                is_starter=False
+            ))
+
+        # Bulk insert
+        with transaction.atomic():
+            Item.objects.bulk_create(new_items)
+
+        return Response(f"{len(new_items)} new items added to the database.", status=s.HTTP_201_CREATED)

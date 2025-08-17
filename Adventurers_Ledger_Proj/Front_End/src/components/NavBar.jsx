@@ -73,7 +73,9 @@ export default function NavBar() {
                 <li>
                     <Link to="/shop">Shop</Link>
                 </li>
-                
+                <li>
+                    <Link to="/create-character">Character Creation (in development)</Link>
+                </li>
                 { !isAuthenticated ? (
                     <div style={{ color: 'black' }}>
                     <form className='' onSubmit={(e) => e.preventDefault()}>
