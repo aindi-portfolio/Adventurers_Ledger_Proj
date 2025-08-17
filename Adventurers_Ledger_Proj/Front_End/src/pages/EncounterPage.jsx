@@ -3,6 +3,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import {EncounterButton} from '../components/Button';
 import fetchCharacterStats from '../services/FetchStats';
+import fetchMonster from '../services/FetchMonster';
 
 export default function EncounterPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -11,14 +12,19 @@ export default function EncounterPage() {
     const [character, setCharacter] = useState(null);
 
 
-    useEffect(async () => {
-        const token = localStorage.getItem('authToken');
-        setIsAuthenticated(!!token);
-        // Fetch character and enemy data here if needed
-        const stats_data = await fetchCharacterStats();
-        setCharacter(stats_data);
-        console.log("Character data:", stats_data);
-        // Example: fetchCharacterData() and fetchEnemyData()
+    useEffect(() => {
+        const fetchData = async () => {
+            const token = localStorage.getItem('authToken');
+            setIsAuthenticated(!!token);
+            // Fetch character and enemy data here if needed
+            const stats_data = await fetchCharacterStats();
+            setCharacter(stats_data);
+            console.log("Character data:", stats_data);
+            const monster_data = await fetchMonster(character.level);
+            setEnemy(monster_data);
+            console.log("Enemy data:", monster_data);
+        };
+        fetchData();
     }, []);
 
     return (

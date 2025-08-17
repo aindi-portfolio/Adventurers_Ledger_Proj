@@ -2,10 +2,12 @@ import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status as s
-from .models import Monster
+from .serializers import Monster, MonsterSerializer
 from .utils import get_dice_average
+import random
 
 API_BASE_URL = "https://www.dnd5eapi.co"
+
 
 class SeedMonstersView(APIView):
     """
@@ -78,3 +80,38 @@ class SeedMonstersView(APIView):
         print (f"Monsters with CR: {challenge_rating} have been added to the Data Base")
         print (f"Total monsters added to the DB: {Monster.objects.count()}")
         return Response(f"{Monster.objects.count()} Monsters with CR: {challenge_rating} have been added to the Data Base", status=s.HTTP_201_CREATED)
+    
+
+class RandomMonsterByCR(APIView):
+    """
+    GET /random-monster/
+    Returns a random monster from the Monster model.
+    """
+
+    def get(self, request):
+        """
+        Returns a list of monsters filtered by challenge rating.
+        If no challenge rating is provided, it returns a random monster from the entire Monster model.
+        If no mosters with the provided challenge rating are found, then triggers SeedMonstersView to seed the monsters.
+        """
+        
+        challenge_rating = request.GET.get("challenge_rating")
+        
+        if challenge_rating:
+            try:
+                challenge_rating = float(challenge_rating)
+                print(f"Challenge Rating provided: {challenge_rating}")
+            except ValueError:
+                return Response({"error": "Invalid challenge rating."}, status=s.HTTP_400_BAD_REQUEST)
+
+            monsters = Monster.objects.filter(xp__gte=challenge_rating * 100)
+            serialized_monsters = MonsterSerializer(monsters, many=True)
+            return Response(serialized_monsters.data, status=s.HTTP_200_OK)
+        else:
+            print("No challenge rating provided, fetching a random monster from the entire Monster model.")
+            monsters = Monster.objects.all()
+            if not monsters.exists():
+                print("No monsters found, seeding monsters.")
+                SeedMonstersView().post(request)
+
+        
