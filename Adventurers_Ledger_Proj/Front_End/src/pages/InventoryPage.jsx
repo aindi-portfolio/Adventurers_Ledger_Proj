@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect, createContext} from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import axios from "axios";
@@ -60,3 +60,21 @@ export default function Inventory() {
         </>  
     );
 }
+
+
+
+// Create the context
+export const ItemsContext = createContext();
+
+// Create a provider component
+export const ItemsProvider = ({ children }) => {
+    const [items, setItems] = useState([]);
+
+    return (
+        <ItemsContext.Provider value={{ items, setIems }}>
+            {children}
+        </ItemsContext.Provider>
+    );
+}
+
+

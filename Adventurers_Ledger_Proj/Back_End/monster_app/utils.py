@@ -48,9 +48,14 @@ def calculate_valid_cr_to_level(character_level):
     ]
     
     # Determine the valid challenge ratings (CR) based on the character level.
+    valid_cr_list = []
+    if character_level > 20:
+        return None
     for entry in solo_cr_scale:
         min_level, max_level = entry["level_range"]
         if min_level <= character_level <= max_level:
             cr_min = entry["cr_min"]
             cr_max = entry["cr_max"]
-            return [cr for cr in valid_crs if cr_min <= cr <= cr_max] # List of valid CRs for the character level
+            valid_cr_list.extend([cr for cr in valid_crs if cr_min <= cr <= cr_max])
+
+    return valid_cr_list if valid_cr_list else None

@@ -16,10 +16,10 @@ const SeedItems = async () => {
 };
 
 
-const SeedMonsters = async (challenge_rating) => {
+const SeedMonsters = async (character_level) => {
     try {
         const response = await axios.post("http://localhost:8000/api/monsters/seed-monsters", {
-            challenge_rating: challenge_rating,
+            character_level: character_level,
         }, {
             headers: {
                 Authorization: `Token ${localStorage.getItem("authToken")}`,

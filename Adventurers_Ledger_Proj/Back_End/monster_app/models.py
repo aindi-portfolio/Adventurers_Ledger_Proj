@@ -27,4 +27,5 @@ class Monster(models.Model):
     armor = models.IntegerField(default=10) # Will be taken from armor_class.value from D&D API
     xp = models.IntegerField(default=5) # Will be taken from xp from D&D API
     passive_perception = models.IntegerField(default=5) # Will be taken from senses.passive_perception from D&D API
+    challenge_rating = models.FloatField(default=0) # Will be taken from challenge_rating from D&D API
     image_url = models.CharField(max_length=200, blank=True, null=True)

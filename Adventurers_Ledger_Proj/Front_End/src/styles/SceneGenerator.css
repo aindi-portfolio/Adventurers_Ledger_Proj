@@ -1,0 +1,29 @@
+.scene-card {
+    background: #1e1e2f;
+    color: #f0f0f0;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #000;
+    max-width: 500px;
+    margin: auto;
+  }
+  .scene-card h2 {
+    margin-bottom: 0.5rem;
+  }
+  .scene-card ul {
+    list-style: none;
+    padding: 0;
+  }
+  .scene-card li {
+    margin: 0.3rem 0;
+  }
+  .scene-card button {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: #4e4eff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  

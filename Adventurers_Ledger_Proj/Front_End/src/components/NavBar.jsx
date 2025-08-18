@@ -4,7 +4,7 @@ import '../styles/NavBar.css';
 import Button from './Button';
 import InputField from './InputField';
 import { Sign_Up, Log_In, Log_Out } from '../services/authServices';
-import { SeedItems, SeedMonsters } from "../services/SeedFunctions";
+import { SeedItems } from "../services/SeedFunctions";
 
 export default function NavBar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -99,8 +99,6 @@ export default function NavBar() {
             </ul>
             <div className="">
               <Button onClick={SeedItems}>Seed Equipment</Button>
-              <br />
-              <Button type="button" onClick={async () => SeedMonsters(challenge_rating)}>Seed Monsters</Button>
             </div>
         </div>
     );
