@@ -6,6 +6,11 @@ import Footer from "../components/Footer";
 
 
 function HomePage() {
+  const [itemsSeeded, setItemsSeeded] = useState(false);
+
+  useEffect(() => {
+
+  }, [itemsSeeded]);
 
   return (
     <>

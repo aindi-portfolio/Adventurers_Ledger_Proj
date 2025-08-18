@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import React, { useState, useEffect, createContext } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { EncounterButton } from '../components/Button';
@@ -7,11 +6,12 @@ import { SeedMonsters } from '../services/SeedFunctions';
 import fetchCharacterStats from '../services/FetchStats';
 import fetchMonster from '../services/FetchMonster';
 import { Attack } from '../services/EncounterActions';
-import { ItemsContext } from './InventoryPage';
 
 export default function EncounterPage() {
-    const { enemy, setEnemy, character, setCharacter, isAuthenticated, setIsAuthenticated, isFighting, setIsFighting } = useOutletContext().myContextObject;
-    const { items, setItems } = useContext(ItemsContext);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isFighting, setIsFighting] = useState(false);
+    const [enemy, setEnemy] = useState(null);
+    const [character, setCharacter] = useState(null);
 
     const handleMonsterFetch = async () => {
         try {
@@ -26,8 +26,8 @@ export default function EncounterPage() {
     const seed_monsters = async (character_level) => {
         if (character_level) {
             SeedMonsters(character_level)
-                // .then(() => console.log("Monsters seeded successfully."))
-                // .catch(err => console.error("Error seeding monsters:", err));
+                .then(() => console.log("Monsters seeded successfully."))
+                .catch(err => console.error("Error seeding monsters:", err));
         }
     }
 
@@ -38,7 +38,7 @@ export default function EncounterPage() {
             // Fetch character and enemy data here if needed
             const stats_data = await fetchCharacterStats();
             setCharacter(stats_data);
-            // console.log("Character data:", stats_data);
+            console.log("Character data:", stats_data);
             seed_monsters(stats_data.level);
         };
         fetchData();
@@ -60,9 +60,9 @@ export default function EncounterPage() {
     };
 
     const handleAttack = () => {
-        const result = Attack();
-        setEnemy({ ...enemy, health: result.enemy_health });
-        setCharacter({ ...character, health: result.character_health });
+        const [enemy_health_change, character_health_change] = Attack({ enemy, character });
+        setEnemy({ ...enemy, health: enemy_health_change });
+        setCharacter({ ...character, health: character_health_change });
     }
 
     return (
@@ -77,10 +77,7 @@ export default function EncounterPage() {
                 <>
                     <h1>Encounter Page</h1>
                     <p>Welcome to the Encounter Page! Here you can manage your encounters.</p>
-                    <EncounterButton 
-                    onClick={() => { handleAction('You are hunting!'); setIsFighting(true); setEnemy(handleMonsterFetch({enemy, character, items})); }} 
-                    children="Hunt" 
-                    className='bg-gradient-to-r from-green-700 to-green-500 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-green-400 hover:scale-105 transition-transform duration-200 border-2 border-green-800'/>
+                    <EncounterButton onClick={() => { handleAction('You are hunting!'); setIsFighting(true); setEnemy(handleMonsterFetch()); }} children="Hunt" className='bg-gradient-to-r from-green-700 to-green-500 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-green-400 hover:scale-105 transition-transform duration-200 border-2 border-green-800'/>
                 </>
                 ) : (
                 <div className="Battle-Container text-center m-5">
@@ -102,22 +99,9 @@ export default function EncounterPage() {
                     </div>
                     
                     <div className='battle-actions space-x-5'>
-                        
-                        <EncounterButton 
-                        onClick={handleAttack} 
-                        children="Attack" 
-                        className='bg-gradient-to-r from-green-700 to-green-500 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-green-400 hover:scale-105 transition-transform duration-200 border-2 border-green-800'/>
-
-                        <EncounterButton 
-                        onClick={() => alert('Defend!')} 
-                        children="Defend" 
-                        className='bg-gradient-to-r from-blue-700 to-blue-500 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-blue-400 hover:scale-105 transition-transform duration-200 border-2 border-blue-800'/>
-
-                        <EncounterButton 
-                        onClick={() => alert('Run!')} 
-                        children="Escape" 
-                        className='bg-gradient-to-r from-red-700 to-red-500 text-white font-semibold rounded-lg shadow-md hover:from-red-600 hover:to-red-400 hover:scale-105 transition-transform duration-200 border-2 border-red-800'/>
-
+                        <EncounterButton onClick={handleAttack} children="Attack" className='bg-gradient-to-r from-green-700 to-green-500 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-green-400 hover:scale-105 transition-transform duration-200 border-2 border-green-800'/>
+                        <EncounterButton onClick={() => alert('Defend!')} children="Defend" className='bg-gradient-to-r from-blue-700 to-blue-500 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-blue-400 hover:scale-105 transition-transform duration-200 border-2 border-blue-800'/>
+                        <EncounterButton onClick={() => alert('Run!')} children="Escape" className='bg-gradient-to-r from-red-700 to-red-500 text-white font-semibold rounded-lg shadow-md hover:from-red-600 hover:to-red-400 hover:scale-105 transition-transform duration-200 border-2 border-red-800'/>
                     </div>
                 </div>
                 )}

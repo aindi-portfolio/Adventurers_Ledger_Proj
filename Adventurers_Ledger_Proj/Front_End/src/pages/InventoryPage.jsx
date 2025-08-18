@@ -71,7 +71,7 @@ export const ItemsProvider = ({ children }) => {
     const [items, setItems] = useState([]);
 
     return (
-        <ItemsContext.Provider value={{ items, setItems }}>
+        <ItemsContext.Provider value={{ items, setIems }}>
             {children}
         </ItemsContext.Provider>
     );
