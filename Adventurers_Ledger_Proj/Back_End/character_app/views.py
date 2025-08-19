@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status as s
 from rest_framework.response import Response
 from .serializers import InventorySerializer, Inventory, Character, CharacterSerializer
-from item_app.views import ItemSerializer
+from item_app.views import ItemSerializer, Item
 from user_app.models import UserAccount
 from item_app.models import Item
 import requests
@@ -133,7 +133,7 @@ class ManageCharacter(APIView):
             return Response({"message": str(e)}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-    ## Update the cahracter attributes (like level, experience, health, gold)
+    ## Update the character attributes (like level, experience, health, gold)
     def put(self, request):
         try:
             user_account = request.user
@@ -202,3 +202,100 @@ class InventoryManager(APIView):
         except Inventory.DoesNotExist:
             return Response({"message": "Inventory not found."}, status=s.HTTP_404_NOT_FOUND)
     
+    def post(self, request):
+        try:
+            character = Character.objects.get(user_account=request.user)
+            item_name = request.data.get("item_name")
+            quantity = int(request.data.get("quantity", 1)) # Default to 1 if not provided
+
+            if not item_name:
+                return Response({"error": "item_name is required"}, status=s.HTTP_400_BAD_REQUEST)
+
+            try:
+                item = Item.objects.get(name=item_name)
+            except Item.DoesNotExist:
+                return Response({"error": "Item not found"}, status=s.HTTP_404_NOT_FOUND)
+
+            # Check if item already exists in inventory
+            inventory_entry, created = Inventory.objects.get_or_create(
+                character=character,
+                item=item,
+                defaults={"quantity": quantity}
+            )
+
+            if not created:
+                inventory_entry.add(quantity)
+
+            serializer = InventorySerializer(inventory_entry)
+            return Response(serializer.data, status=s.HTTP_201_CREATED if created else s.HTTP_200_OK)
+
+        except Character.DoesNotExist:
+            return Response({"error": "Character not found"}, status=s.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(f"Error: {e}")
+            return Response({"error": str(e)}, status=s.HTTP_400_BAD_REQUEST)
+        
+
+    def put(self, request):
+        try:
+            character = Character.objects.get(user_account=request.user)
+            item_name = request.data.get("item_name")
+            quantity = int(request.data.get("quantity", 1))  # Can be positive or negative
+
+            if not item_name:
+                return Response({"error": "item_name is required"}, status=s.HTTP_400_BAD_REQUEST)
+
+            try:
+                item = Item.objects.get(name=item_name)
+            except Item.DoesNotExist:
+                return Response({"error": "Item not found"}, status=s.HTTP_404_NOT_FOUND)
+
+            try:
+                inventory_entry = Inventory.objects.get(character=character, item=item)
+            except Inventory.DoesNotExist:
+                return Response({"error": "Item not found in inventory"}, status=s.HTTP_404_NOT_FOUND)
+
+            if quantity > 0:
+                inventory_entry.add(quantity)
+            else:
+                inventory_entry.sub(abs(quantity))
+
+            serializer = InventorySerializer(inventory_entry)
+            return Response(serializer.data, status=s.HTTP_200_OK)
+
+        except Character.DoesNotExist:
+            return Response({"error": "Character not found"}, status=s.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(f"Error: {e}")
+            return Response({"error": str(e)}, status=s.HTTP_400_BAD_REQUEST)
+        
+    
+
+    def delete(self, request):
+        try:
+            character = Character.objects.get(user_account=request.user)
+            item_name = request.data.get("item_name")
+
+            if not item_name:
+                return Response({"error": "item_name is required"}, status=s.HTTP_400_BAD_REQUEST)
+
+            try:
+                item = Item.objects.get(name=item_name)
+            except Item.DoesNotExist:
+                return Response({"error": "Item not found"}, status=s.HTTP_404_NOT_FOUND)
+
+            try:
+                inventory_entry = Inventory.objects.get(character=character, item=item)
+            except Inventory.DoesNotExist:
+                return Response({"error": "Item not found in inventory"}, status=s.HTTP_404_NOT_FOUND)
+
+            inventory_entry.delete()
+            return Response({"message": f"{item_name} removed from inventory."}, status=s.HTTP_200_OK)
+
+        except Character.DoesNotExist:
+            return Response({"error": "Character not found"}, status=s.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(f"Error: {e}")
+            return Response({"error": str(e)}, status=s.HTTP_400_BAD_REQUEST)
+
+

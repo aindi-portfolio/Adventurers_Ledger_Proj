@@ -35,6 +35,30 @@ class GetItemByNameView(APIView):
         return Response(serializer.data, status=s.HTTP_200_OK)
 
 
+class GetRandomItem(APIView):
+
+    def get(self, request):
+        try:
+            item_list = []
+            count = int(request.query_params.get('count', 1))
+            while len(item_list) < count:
+                # Fetch a random item from the database making sure that they don't repeat
+                items = Item.objects.order_by('?')[:count]
+                if not items:
+                    break
+                print(f"Item list: {item_list}")
+                item_list.extend(items)
+            # print(f"Randomly selected {len(items)} items from the database.")
+            serializer = ItemSerializer(item_list, many=True)
+            # print(f"Returning {len(serializer.data)} random items.")
+            return Response(serializer.data, status=s.HTTP_200_OK)
+        except Exception as e:
+            print(f"Error occurred while fetching random items: {e}")
+            return Response({"error": "An error occurred while fetching random items."}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        
+
+
 class SeedItemsView(APIView):
     def post(self, request):
         EQUIPMENT_CATEGORIES = ['weapon', 'armor', 'potion', 'tools']

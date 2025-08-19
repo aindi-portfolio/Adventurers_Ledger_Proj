@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { GlobalStateContext } from '../context/GlobalStateContext';
 import { Link } from 'react-router-dom';
 import '../styles/NavBar.css';
 import Button from './Button';
@@ -7,7 +8,7 @@ import { Sign_Up, Log_In, Log_Out } from '../services/authServices';
 import { SeedItems } from "../services/SeedFunctions";
 
 export default function NavBar() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated, setIsAuthenticated, isFighting, setIsFighting, enemy, setEnemy, character, setCharacter, items, setItems } = useContext(GlobalStateContext);
   const [showLogin, setShowLogin] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

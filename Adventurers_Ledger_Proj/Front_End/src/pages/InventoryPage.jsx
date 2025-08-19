@@ -22,8 +22,9 @@ export default function Inventory() {
             setItems(fetched_inventory);
             return fetched_inventory;
         }
-        const fetched_inventory = fetchData();
-        console.log("Fetched items:", fetched_inventory);
+        fetchData().then(fetched_inventory => {
+            console.log("Fetched items:", fetched_inventory);
+        });
     }, []);
 
     return (
