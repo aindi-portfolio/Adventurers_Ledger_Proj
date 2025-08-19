@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import { GlobalStateProvider } from './context/GlobalStateContext'
 import './App.css'
 import { Outlet } from 'react-router-dom'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
+    <GlobalStateProvider>
       <Outlet />
+    </GlobalStateProvider>
     </>
   )
 }

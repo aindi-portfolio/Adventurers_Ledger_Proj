@@ -1,17 +1,16 @@
-import React, { useState, useEffect, createContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { GlobalStateContext } from '../context/GlobalStateContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { EncounterButton } from '../components/Button';
 import { SeedMonsters } from '../services/SeedFunctions';
 import fetchCharacterStats from '../services/FetchStats';
 import fetchMonster from '../services/FetchMonster';
-import { Attack } from '../services/EncounterActions';
+import { useAttack } from '../services/EncounterActions';
+import fetchInventory from '../services/FetchInventory';
 
 export default function EncounterPage() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isFighting, setIsFighting] = useState(false);
-    const [enemy, setEnemy] = useState(null);
-    const [character, setCharacter] = useState(null);
+    const { isAuthenticated, setIsAuthenticated, isFighting, setIsFighting, enemy, setEnemy, character, setCharacter, items, setItems } = useContext(GlobalStateContext);
 
     const handleMonsterFetch = async () => {
         try {
@@ -39,6 +38,8 @@ export default function EncounterPage() {
             const stats_data = await fetchCharacterStats();
             setCharacter(stats_data);
             console.log("Character data:", stats_data);
+            const fetched_inventory = await fetchInventory();
+            setItems(fetched_inventory);
             seed_monsters(stats_data.level);
         };
         fetchData();
@@ -59,10 +60,12 @@ export default function EncounterPage() {
         }
     };
 
+    const attack = useAttack();
+
     const handleAttack = () => {
-        const [enemy_health_change, character_health_change] = Attack({ enemy, character });
-        setEnemy({ ...enemy, health: enemy_health_change });
-        setCharacter({ ...character, health: character_health_change });
+        const { enemyHealth, characterHealth} = attack();
+        console.log("Enemy health after attack:", enemyHealth);
+        console.log("Character health after attack:", characterHealth);
     }
 
     return (
@@ -77,7 +80,10 @@ export default function EncounterPage() {
                 <>
                     <h1>Encounter Page</h1>
                     <p>Welcome to the Encounter Page! Here you can manage your encounters.</p>
-                    <EncounterButton onClick={() => { handleAction('You are hunting!'); setIsFighting(true); setEnemy(handleMonsterFetch()); }} children="Hunt" className='bg-gradient-to-r from-green-700 to-green-500 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-green-400 hover:scale-105 transition-transform duration-200 border-2 border-green-800'/>
+                    <EncounterButton 
+                    onClick={() => { handleAction('You are hunting!'); setIsFighting(true); setEnemy(handleMonsterFetch()); }} 
+                    children="Hunt" 
+                    className='bg-gradient-to-r from-green-700 to-green-500 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-green-400 hover:scale-105 transition-transform duration-200 border-2 border-green-800'/>
                 </>
                 ) : (
                 <div className="Battle-Container text-center m-5">
@@ -99,9 +105,20 @@ export default function EncounterPage() {
                     </div>
                     
                     <div className='battle-actions space-x-5'>
-                        <EncounterButton onClick={handleAttack} children="Attack" className='bg-gradient-to-r from-green-700 to-green-500 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-green-400 hover:scale-105 transition-transform duration-200 border-2 border-green-800'/>
-                        <EncounterButton onClick={() => alert('Defend!')} children="Defend" className='bg-gradient-to-r from-blue-700 to-blue-500 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-blue-400 hover:scale-105 transition-transform duration-200 border-2 border-blue-800'/>
-                        <EncounterButton onClick={() => alert('Run!')} children="Escape" className='bg-gradient-to-r from-red-700 to-red-500 text-white font-semibold rounded-lg shadow-md hover:from-red-600 hover:to-red-400 hover:scale-105 transition-transform duration-200 border-2 border-red-800'/>
+                        <EncounterButton 
+                        onClick={handleAttack} 
+                        children="Attack" 
+                        className='bg-gradient-to-r from-green-700 to-green-500 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-green-400 hover:scale-105 transition-transform duration-200 border-2 border-green-800'/>
+
+                        <EncounterButton 
+                        onClick={() => alert('Defend!')} 
+                        children="Defend" 
+                        className='bg-gradient-to-r from-blue-700 to-blue-500 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-blue-400 hover:scale-105 transition-transform duration-200 border-2 border-blue-800'/>
+
+                        <EncounterButton 
+                        onClick={() => alert('Run!')} 
+                        children="Escape" 
+                        className='bg-gradient-to-r from-red-700 to-red-500 text-white font-semibold rounded-lg shadow-md hover:from-red-600 hover:to-red-400 hover:scale-105 transition-transform duration-200 border-2 border-red-800'/>
                     </div>
                 </div>
                 )}

@@ -1,28 +1,14 @@
-import React, { useState, useEffect, createContext} from "react";
+import React, { useState, useEffect, useContext} from "react";
+import { GlobalStateContext } from "../context/GlobalStateContext";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import axios from "axios";
+import fetchInventory from "../services/FetchInventory";
 
 export default function Inventory() {
-    const [items, setItems] = useState([]);
+    const {items, setItems} = useContext(GlobalStateContext);
 
     // Fetch items from the API when the component mounts
-    const fetchItems = async () => {
-        try {
-            const token = localStorage.getItem('authToken');
-            const response = await axios.get('http://localhost:8000/api/character/inventory', {
-                headers: {
-                    authorization: `Token ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            setItems(response.data);
-            console.log('Fetched items:', response.data);
-        } catch (error) {
-            console.error('Error fetching items:', error);
-        }
-
-    }
+    
     useEffect(() => {
         // Check if the user is authenticated
         const token = localStorage.getItem('authToken');
@@ -31,7 +17,13 @@ export default function Inventory() {
             alert('You must be logged in to view character stats.');
             window.location.href = '/';
         }
-        fetchItems();
+        const fetchData = async () => {
+            const fetched_inventory = await fetchInventory();
+            setItems(fetched_inventory);
+            return fetched_inventory;
+        }
+        const fetched_inventory = fetchData();
+        console.log("Fetched items:", fetched_inventory);
     }, []);
 
     return (
@@ -60,21 +52,3 @@ export default function Inventory() {
         </>  
     );
 }
-
-
-
-// Create the context
-export const ItemsContext = createContext();
-
-// Create a provider component
-export const ItemsProvider = ({ children }) => {
-    const [items, setItems] = useState([]);
-
-    return (
-        <ItemsContext.Provider value={{ items, setIems }}>
-            {children}
-        </ItemsContext.Provider>
-    );
-}
-
-
