@@ -17,6 +17,14 @@ class Character(models.Model):
     gold = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    def __repr__(self):
+        print(f"""
+              Character Name: {self.name}\n
+              Character Level: {self.level}\n
+              Character Experience: {self.experience}\n
+              Character Health: {self.health}\n
+              Character Gold: {self.gold}""")
+
 class Inventory(models.Model):
     """
     Inventory holds items for a character.
@@ -24,6 +32,33 @@ class Inventory(models.Model):
     character = models.ForeignKey(Character, on_delete=models.CASCADE, related_name='inventory')
     item = models.ForeignKey('item_app.Item', on_delete=models.CASCADE, related_name='inventory_items')
     quantity = models.IntegerField(default=1)
+
+    def add(self, amount=1):
+        if amount < 1:
+            raise ValueError("Amount must be at least 1")
+        self.quantity += amount
+        self.save()
+    
+    def sub(self, amount=1):
+        if amount < 1:
+            raise ValueError("Amount must be at least 1")
+        if self.quantity - amount < 1:
+            return self.delete()
+        self.quantity -= amount
+        self.save()
+    
+    def add_item(self, item):
+        self.item = item
+        self.save()
+        self.quantity += 1
+
+    def delete_item(self, item):
+        # 1. Check if item (by name) is in the cart
+        # 2. If it is, remove it
+        if self.item == item:
+            self.delete()
+        else:
+            raise ValueError("Item not found in the cart")
 
 
 class Transaction(models.Model):

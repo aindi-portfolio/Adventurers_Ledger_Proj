@@ -26,7 +26,7 @@ const SeedMonsters = async (character_level) => {
                 "Content-Type": "application/json",
             },
         });
-        console.log("Monsters seeded:", response.data);
+        // console.log("Monsters seeded:", response.data);
     } catch (err) {
         console.error("Error seeding monsters:", err);
     }

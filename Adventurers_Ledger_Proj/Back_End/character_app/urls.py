@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import InventoryManager, CreateCharacter, CharacterStats
+from .views import InventoryManager, ManageCharacter, CharacterStats
 
 urlpatterns = [
     path('inventory', InventoryManager.as_view(), name='inventory'),
-    path('create-character', CreateCharacter.as_view(), name='create_character'),
+    path('manage-character', ManageCharacter.as_view(), name='manage_character'),
     path('stats', CharacterStats.as_view(), name='stats'),
 ]

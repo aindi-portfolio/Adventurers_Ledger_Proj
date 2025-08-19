@@ -12,7 +12,7 @@ export default function CharacterPage() {
         try {
             const token = localStorage.getItem('authToken');
             const response = await axios.post(
-                'http://localhost:8000/api/character/create-character',
+                'http://localhost:8000/api/character/manage-character',
                 characterData,
                 {
                     headers: {

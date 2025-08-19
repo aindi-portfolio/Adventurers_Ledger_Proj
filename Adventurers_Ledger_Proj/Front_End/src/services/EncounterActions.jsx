@@ -1,8 +1,9 @@
 import { useContext } from 'react';
 import { GlobalStateContext } from '../context/GlobalStateContext';
+import updateCharacterStats from './UpdateCharacterStats';
 
 const useAttack = () => {
-    const { character, setCharacter, enemy, setEnemy, items } = useContext(GlobalStateContext);
+    const { character, setCharacter, enemy, setEnemy, items, isFighting, setIsFighting } = useContext(GlobalStateContext);
 
     const attack = () => {
 
@@ -26,6 +27,8 @@ const useAttack = () => {
         character_attack_damage += item_damage; // Add item damage to character attack damage
         // console.log("Total character attack damage:", character_attack_damage);
 
+        const experience = enemy.xp
+
         // ATTACK ENEMY AND UPDATE ENEMY HEALTH
         enemy.health -= character_attack_damage;
 
@@ -43,8 +46,10 @@ const useAttack = () => {
 
         if (enemy.health <= 0 && character.health > 0) {
             alert("You win!");
+            updateCharacterStats(character.health, experience)
+            setIsFighting(false)
             window.location.href = '/encounter'; // Redirect to home page after victory
-            return { enemyHealth: enemy.health, characterHealth: character.health };
+            return { ...character, characterHealth: character.health };
         }
         if (character.health <= 0) {
             alert("You lose!");

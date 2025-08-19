@@ -14,6 +14,6 @@ export default async function fetchCharacterStats() {
         return response.data;
     } catch (error) {
         console.error('Error fetching character stats:', error);
-        return error
+        return
     }
 }

@@ -11,14 +11,15 @@ from item_app.models import Item
 import requests
 from item_app.utils import get_dice_average
 import traceback
+from .utils.levelingLogic import applyExperienceGain
 
 # Create your views here.
-class CreateCharacter(APIView):
+class ManageCharacter(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
 
-    def post(self, request):
+    def post(self, request): # Make a new character, give it starting items based on class selection
 
         STARTER_ITEMS_FOR_CLASSES = [ # For future class selection, these are the starter item by name (not index in D&D API)
                 {
@@ -130,7 +131,46 @@ class CreateCharacter(APIView):
             print("Exception during character creation:", e)
             traceback.print_exc()
             return Response({"message": str(e)}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    ## Update the cahracter attributes (like level, experience, health, gold)
+    def put(self, request):
+        try:
+            user_account = request.user
+            working_character = Character.objects.get(user_account=user_account)
+            # print(working_character.__repr__())
+            working_character.health = request.data.get('health')
+            # print(f"Updated Health: {working_character.health}")
+            working_character.gold = request.data.get('gold')
+            # print(f"Updated Gold: {working_character.gold}")
             
+            # Update level and experience
+            # working_character.level = request.data.get('level')
+            # working_character.experience = request.data.get('experience')
+            working_character = applyExperienceGain(working_character, request.data.get('experience'))
+            # print(f"-----result from the LEVELING LOGIC: {working_character.__repr__()}")
+
+            working_character.save()
+            serialized_character = CharacterSerializer(working_character)
+            return Response(serialized_character.data, status=s.HTTP_202_ACCEPTED)
+        except Exception as e:
+            traceback.print_exc()
+            print(f"Error: {e}")
+            return Response(f"Error updating character: {e}", status=s.HTTP_400_BAD_REQUEST)
+        
+
+
+    def delete(self,request):
+        try:
+            user_account = request.user
+            working_character = Character.objects.get(user_account=user_account)
+            working_character.dele
+            working_character
+        except Exception as e:
+            traceback.print_exc()
+            print(f"Error: {e}")
+            return Response(f"Error deleting character: {e}", status=s.HTTP_400_BAD_REQUEST)
+
 class CharacterStats(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -151,11 +191,11 @@ class InventoryManager(APIView):
 
     def get(self, request):
         try:
-            print(request.user)
+            # print(request.user)
             character = Character.objects.get(user_account=request.user)
             inventory = Inventory.objects.filter(character=character)
             serialized_inventory = InventorySerializer(inventory, many=True)
-            print(serialized_inventory.data)
+            # print(serialized_inventory.data)
             return Response(serialized_inventory.data,status=s.HTTP_200_OK)
         except Character.DoesNotExist:
             return Response({"message": "Character not found."}, status=s.HTTP_404_NOT_FOUND)

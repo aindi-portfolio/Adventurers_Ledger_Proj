@@ -24,14 +24,14 @@ class SeedMonstersView(APIView):
         # 1ST PULL: Fetches list of monsters by challenge rating
         character_level = request.data.get("character_level")
         cr_list = calculate_valid_cr_to_level(character_level)
-        print(f"Valid CR list for character level {character_level}: {cr_list}")
+        # print(f"Valid CR list for character level {character_level}: {cr_list}")
 
        
         for cr in cr_list:
 
             challenge_rating = cr
             if challenge_rating in Monster.objects.values_list('challenge_rating', flat=True):
-                print(f"Monsters with CR: {challenge_rating} already exist in the database.")
+                # print(f"Monsters with CR: {challenge_rating} already exist in the database.")
                 return Response(f"Monsters with CR: {challenge_rating} already exist in the database.", status=s.HTTP_200_OK)
 
             monsters_by_CR = f"{API_BASE_URL}/api/2014/monsters?challenge_rating={cr}"
@@ -43,7 +43,7 @@ class SeedMonstersView(APIView):
             data = response.json()
             
             monster_list = data.get("results", []) # Ensure this key matches the API response structure
-            print (f"Total monsters added: {len(monster_list)}")
+            # print (f"Total monsters added: {len(monster_list)}")
 
             # 2ND PULL: Fetches each monster's details from the provided url in the first pull
             for monster_ref in monster_list:
@@ -90,8 +90,8 @@ class SeedMonstersView(APIView):
                 
                 monster.save()
 
-        print (f"Monsters with CR: {challenge_rating} have been added to the Data Base")
-        print (f"Total monsters added to the DB: {Monster.objects.count()}")
+        # print (f"Monsters with CR: {challenge_rating} have been added to the Data Base")
+        # print (f"Total monsters added to the DB: {Monster.objects.count()}")
         return Response(f"{Monster.objects.count()} Monsters with CR: {challenge_rating} have been added to the Data Base", status=s.HTTP_201_CREATED)
     
 
@@ -109,15 +109,15 @@ class RandomMonsterByCR(APIView):
         """
     
         character_level = level
-        print(f"Character Level provided: {character_level}")
+        # print(f"Character Level provided: {character_level}")
 
         cr_list = calculate_valid_cr_to_level(character_level)
-        print(f"Valid CR list for character level {character_level}: {cr_list}")
+        # print(f"Valid CR list for character level {character_level}: {cr_list}")
 
         challenge_rating = random.choice(cr_list) if cr_list else None
-        print(f"Randomly selected challenge rating: {challenge_rating}")
+        # print(f"Randomly selected challenge rating: {challenge_rating}")
 
-        if challenge_rating:
+        if challenge_rating or challenge_rating == 0:
             monsters = Monster.objects.filter(challenge_rating=challenge_rating)
             serialized_monsters = MonsterSerializer(monsters, many=True)
             return Response(serialized_monsters.data, status=s.HTTP_200_OK)

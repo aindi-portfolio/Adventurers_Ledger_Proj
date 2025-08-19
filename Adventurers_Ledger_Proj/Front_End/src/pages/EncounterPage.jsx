@@ -9,6 +9,7 @@ import fetchMonster from '../services/FetchMonster';
 import { useAttack } from '../services/EncounterActions';
 import fetchInventory from '../services/FetchInventory';
 
+
 export default function EncounterPage() {
     const { isAuthenticated, setIsAuthenticated, isFighting, setIsFighting, enemy, setEnemy, character, setCharacter, items, setItems } = useContext(GlobalStateContext);
 
@@ -25,7 +26,7 @@ export default function EncounterPage() {
     const seed_monsters = async (character_level) => {
         if (character_level) {
             SeedMonsters(character_level)
-                .then(() => console.log("Monsters seeded successfully."))
+                // .then(() => console.log("Monsters seeded successfully."))
                 .catch(err => console.error("Error seeding monsters:", err));
         }
     }
