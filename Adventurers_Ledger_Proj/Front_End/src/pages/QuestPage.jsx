@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { GlobalStateContext } from "../context/GlobalStateContext";
 import axios from "axios";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 const QuestPage = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const { character, setCharacter, isAuthenticated, setIsAuthenticated } = useContext(GlobalStateContext);
   const [loading, setLoading] = useState(false);
   const [quest, setQuest] = useState(null); // quest data from the DB
   const [storyIntro, setStoryIntro] = useState(null); // from 3rd party API
