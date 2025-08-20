@@ -227,7 +227,8 @@ class InventoryManager(APIView):
             )
 
             if not created:
-                inventory_entry.add(quantity)
+                inventory_entry.quantity += quantity  # Update the quantity directly
+                inventory_entry.save()  # Save the updated inventory entry
 
             serializer = InventorySerializer(inventory_entry)
             return Response(serializer.data, status=s.HTTP_201_CREATED if created else s.HTTP_200_OK)
@@ -248,20 +249,25 @@ class InventoryManager(APIView):
             quantity = int(request.data.get("quantity", 1))
 
             if not request.user.is_authenticated:
+                print("User is not authenticated")
                 return Response({"error": "Authentication required"}, status=s.HTTP_401_UNAUTHORIZED)
             if not item_name:
+                print("item_name is required")
                 return Response({"error": "item_name is required"}, status=s.HTTP_400_BAD_REQUEST)
             if quantity == 0:
+                print("Quantity must not be zero")
                 return Response({"error": "Quantity must not be zero"}, status=s.HTTP_400_BAD_REQUEST)
 
             with transaction.atomic():
                 if quantity > 0:
-                    # BUY: Reference from ShopInventory
-                    try:
-                        shop_entry = ShopItem.objects.select_related('item').get(item__name=item_name)
-                        item = shop_entry.item
-                    except ShopItem.DoesNotExist:
-                        return Response({"error": "Item not available in shop"}, status=s.HTTP_404_NOT_FOUND)
+                    shop_entry = ShopItem.objects.select_related('item').filter(item__name=item_name).first()  # Retrieve the item object safely
+                    item_from_db = Item.objects.filter(name=item_name).first()  # Check if item exists in the database
+                    print(f"Item from DB: {item_from_db}")
+                    if not shop_entry:
+                        print(f"Shop item for {item_name} not found.")
+                        return Response({"error": "Shop item not found"}, status=s.HTTP_404_NOT_FOUND)
+                    item = shop_entry.item
+                    print(f"Item found: {item.name}, Price: {shop_entry.price}, Stock: {shop_entry.stock}")
 
                     inventory_entry, created = Inventory.objects.get_or_create(
                         character=character,
@@ -276,9 +282,11 @@ class InventoryManager(APIView):
                     # SELL: Reference from character's own inventory
                     try:
                         inventory_entry = Inventory.objects.select_related('item').get(character=character, item__name=item_name)
-                    except Inventory.DoesNotExist:
-                        return Response({"error": "You do not own this item"}, status=s.HTTP_400_BAD_REQUEST)
+                    except inventory_entry.DoesNotExist:
+                        print(f"Inventory entry for {item_name} not found for character {character.name}.")
+                        return Response({"error": "You do not own this item"}, status=s.HTTP_404_NOT_FOUND)
                     if inventory_entry.quantity < abs(quantity):
+                        print(f"Not enough {item_name} to sell. Available: {inventory_entry.quantity}, Requested: {abs(quantity)}")
                         return Response({"error": f"Not enough {item_name} to sell"}, status=s.HTTP_400_BAD_REQUEST)
 
                     try:

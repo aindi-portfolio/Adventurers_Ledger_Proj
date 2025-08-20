@@ -3,7 +3,8 @@ import { GlobalStateContext } from "../context/GlobalStateContext";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import fetchShopItem from "../services/FetchShopItems";
-import ItemCard from "../components/ItemCard";
+import ItemCardShop from "../components/ItemCardShop";
+import ItemCardShopInventory from "../components/ItemCardShopInventory";
 
 
 export default function ShopPage() {
@@ -41,7 +42,7 @@ export default function ShopPage() {
             <div className="items-list flex flex-wrap justify-center gap-6">
             {shopItems && shopItems.length > 0 ? (
                   shopItems.map((item) => (
-                    <ItemCard key={item.name} item={item} />
+                    <ItemCardShop key={item.name} item={item} />
                 ))
             ) : (
                 <p>No items available in the shop.</p>
@@ -51,10 +52,11 @@ export default function ShopPage() {
                   <h2>Sell Items</h2>
             </div>
             <div className="items-list flex flex-wrap justify-center gap-6">
+              {console.log("User's inventory items:", items)}
             {items && items.length > 0 ? (
                   // Displaying items from the user's inventory by iterating through the items
                   items.map((item) => (
-                        <ItemCard key={item.id} item={item.item} />
+                        <ItemCardShopInventory key={item.name} item={item.item} />
                   ))
             ) : (
                 <p>No items available in the shop.</p>

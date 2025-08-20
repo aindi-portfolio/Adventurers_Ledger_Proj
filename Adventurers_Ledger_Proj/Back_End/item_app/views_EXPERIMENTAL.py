@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status as s
 from .models import Item, ShopItem
-from .serializers import ItemSerializer
+from .serializers import ItemSerializer, ShopItemSerializer
 from .utils_EXPERIMENTAL import get_dice_average
 
 API_BASE_URL = "https://www.dnd5eapi.co"
@@ -57,6 +57,43 @@ class GetRandomItem(APIView):
             return Response({"error": "An error occurred while fetching random items."}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
 
         
+## Add item to the Shop
+class AddItemToShopView(APIView):
+    """
+    POST /add-item-to-shop
+    Fetch 10 items randomly from the db and add them to the shop with a random price and stock.
+    Then return json response with the items that were added to the shop.
+    """
+    
+    def post(self, request):
+        try:
+            requested_count = int(request.data.get('count', 10))
+            existing_shop_items = ShopItem.objects.all()
+            if existing_shop_items.count() >= requested_count:
+                
+                serializer = ShopItemSerializer(existing_shop_items, many=True)
+                
+                return Response(serializer.data, status=s.HTTP_200_OK)
+
+            count = requested_count - existing_shop_items.count()
+            items = Item.objects.order_by('?')[:count]
+            if not items:
+                return Response({"error": "No items available to add to the shop."}, status=s.HTTP_404_NOT_FOUND)
+
+            shop_items = []
+            for item in items:
+                price = max(1, int(item.cost_amount))  # Ensure price is at least 1
+                stock = 1  # Default stock to 1, can be randomized if needed
+                shop_item = ShopItem(item=item, price=price, stock=stock)
+                shop_items.append(shop_item)
+
+            ShopItem.objects.bulk_create(shop_items)
+
+            serializer = ItemSerializer(shop_items, many=True)
+            return Response(serializer.data, status=s.HTTP_201_CREATED)
+        except Exception as e:
+            print(f"Error occurred while adding items to the shop: {e}")
+            return Response({"error": "An error occurred while adding items to the shop."}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class SeedItemsView(APIView):

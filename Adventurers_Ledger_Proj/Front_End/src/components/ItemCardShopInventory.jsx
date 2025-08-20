@@ -1,7 +1,7 @@
 import React from "react";
 import Buy_or_Sell_Item from "../services/BuySellLogic";
 
-const ItemCard = ({ item }) => {
+const ItemCardShopInventory = ({ item }) => {
 
     // Function to handle buying or selling an item
     const handleBuyOrSell = (action, item) => {
@@ -21,4 +21,4 @@ const ItemCard = ({ item }) => {
   );
 };
 
-export default ItemCard;
+export default ItemCardShopInventory;
