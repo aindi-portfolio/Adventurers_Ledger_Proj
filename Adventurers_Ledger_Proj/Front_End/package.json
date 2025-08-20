@@ -10,8 +10,10 @@
     "cy:run": "npx cypress run --spec"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.21",
     "axios": "^1.11.0",
     "bootstrap": "^5.3.7",
+    "postcss": "^8.5.6",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^18.2.0",
