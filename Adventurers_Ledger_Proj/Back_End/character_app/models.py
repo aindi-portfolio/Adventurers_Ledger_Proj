@@ -34,6 +34,10 @@ class Inventory(models.Model):
     quantity = models.IntegerField(default=1)
 
     def add(self, amount=1):
+        # Check if item already exists in the inventory, if not then call the add_item method
+        if self.item not in self.character.inventory.all():
+            self.add_item(self.item)
+            return
         if amount < 1:
             raise ValueError("Amount must be at least 1")
         self.quantity += amount

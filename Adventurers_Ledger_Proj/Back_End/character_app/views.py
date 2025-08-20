@@ -199,8 +199,10 @@ class InventoryManager(APIView):
             return Response(serialized_inventory.data,status=s.HTTP_200_OK)
         except Character.DoesNotExist:
             return Response({"message": "Character not found."}, status=s.HTTP_404_NOT_FOUND)
-        except Inventory.DoesNotExist:
-            return Response({"message": "Inventory not found."}, status=s.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(f"Error: {e}")
+            return Response({"error": str(e)}, status=s.HTTP_400_BAD_REQUEST)
+
     
     def post(self, request):
         try:
@@ -242,18 +244,10 @@ class InventoryManager(APIView):
             item_name = request.data.get("item_name")
             quantity = int(request.data.get("quantity", 1))  # Can be positive or negative
 
-            if not item_name:
-                return Response({"error": "item_name is required"}, status=s.HTTP_400_BAD_REQUEST)
+            item = Item.objects.get(name=item_name)
 
-            try:
-                item = Item.objects.get(name=item_name)
-            except Item.DoesNotExist:
-                return Response({"error": "Item not found"}, status=s.HTTP_404_NOT_FOUND)
+            inventory_entry = Inventory.objects.get(character=character, item=item)
 
-            try:
-                inventory_entry = Inventory.objects.get(character=character, item=item)
-            except Inventory.DoesNotExist:
-                return Response({"error": "Item not found in inventory"}, status=s.HTTP_404_NOT_FOUND)
 
             if quantity > 0:
                 inventory_entry.add(quantity)
