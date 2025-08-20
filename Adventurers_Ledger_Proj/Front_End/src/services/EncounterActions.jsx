@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { GlobalStateContext } from '../context/GlobalStateContext';
 import updateCharacterStats from './UpdateCharacterStats';
+import handleCharacterDeath from './DeleteCharacter';
 
 const useAttack = () => {
     const { character, setCharacter, enemy, setEnemy, items, isFighting, setIsFighting } = useContext(GlobalStateContext);
@@ -35,13 +36,11 @@ const useAttack = () => {
         // ENEMY ATTACKS BACK
         character.health -= enemy.damage;
 
-        // Check if either character or enemy is dead
-        if (enemy.health <= 0) {
-            console.log("Enemy defeated!");
-            enemy.health = 0; // Ensure health doesn't go negative
-        } else if (character.health <= 0) {
+        // Check if character is defeated and call handleCharacterDeath
+        if (character.health <= 0) {
             console.log("Character defeated!");
             character.health = 0; // Ensure health doesn't go negative
+            handleCharacterDeath();
         }
 
         if (enemy.health <= 0 && character.health > 0) {

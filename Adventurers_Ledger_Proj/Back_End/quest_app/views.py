@@ -133,6 +133,7 @@ class AdvanceQuestView(APIView):
             "summary": "A one-line immersive description of what happens as a result of the player's choice."
             "health_change": "integer",
             "gold_change": "integer",
+            "exp_change": "integer",
             "quest_complete": "boolean"
         }}
 

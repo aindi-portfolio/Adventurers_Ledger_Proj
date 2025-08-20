@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { GlobalStateContext } from '../context/GlobalStateContext';
 import { Link } from 'react-router-dom';
-import '../styles/NavBar.css';
+// import '../styles/NavBar.css';
 import Button from './Button';
 import InputField from './InputField';
 import { Sign_Up, Log_In, Log_Out } from '../services/authServices';

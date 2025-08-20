@@ -3,6 +3,8 @@ import { GlobalStateContext } from "../context/GlobalStateContext";
 import axios from "axios";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import fetchCharacterStats from "../services/FetchStats";
+import updateCharacterStats from "../services/UpdateCharacterStats";
 
 const QuestPage = () => {
   const { character, setCharacter, isAuthenticated, setIsAuthenticated } = useContext(GlobalStateContext);
@@ -10,6 +12,7 @@ const QuestPage = () => {
   const [quest, setQuest] = useState(null); // quest data from the DB
   const [storyIntro, setStoryIntro] = useState(null); // from 3rd party API
   const [questFinally, setQuestFinally] = useState(null); // final quest data after player choices
+  const [questComplete, setQuestComplete] = useState(false); // to track if quest is complete
 
   const API_BASE = "http://localhost:8000/api";
 
@@ -68,6 +71,7 @@ const QuestPage = () => {
 
       setQuestFinally(res.data.result);
       console.log("Quest finally:", res.data.result);
+      setQuestComplete(res.data.result.quest_complete);
     } catch (err) {
       console.error("Failed to advance quest:", err);
     }
@@ -79,8 +83,34 @@ const QuestPage = () => {
   }, []);
 
   useEffect(() => {
-    if (quest) return;
-    fetchQuestDB();
+    if (questComplete) {
+      // Update character stats when quest is complete
+      const updateStats = async () => {
+        try {
+          character.health += questFinally.health_change; // If quest failed, restore health
+          character.gold += questFinally.gold_change; // If quest failed, restore gold
+          character.experience += questFinally.exp_change; // If quest failed, restore experience
+          const updatedCharacter = await updateCharacterStats(health=health, gold=gold, experience=experience);
+          setCharacter(updatedCharacter);
+          console.log("Updated character stats:", updatedCharacter);
+          setQuestComplete(false); // reset for next quest
+        } catch (err) {
+          console.error("Failed to update character stats:", err);
+        }
+      };
+      updateStats();
+    }
+  }, [questComplete]);
+
+  useEffect(() => {
+      const fetchData = async () => {
+          if (quest) return;
+          await fetchQuestDB();
+          const stats_data = await fetchCharacterStats();
+          setCharacter(stats_data);
+          console.log("Character data:", stats_data);
+      };
+      fetchData();
   }, []);
 
   const restartQuest = () => {

@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import fetchShopItem from "../services/FetchShopItems";
 import ItemCardShop from "../components/ItemCardShop";
 import ItemCardShopInventory from "../components/ItemCardShopInventory";
+import Layout from "../components/Layout";
 
 
 export default function ShopPage() {
@@ -33,6 +34,7 @@ export default function ShopPage() {
 
     return (
         <>
+        <Layout>
             <Header />
             <div className="shop-container flex-col text-center mb-4">
                 <h1>Shop</h1>
@@ -63,6 +65,7 @@ export default function ShopPage() {
             )}
             </div>
             <Footer />
+        </Layout>
         </>
     );
 }

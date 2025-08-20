@@ -160,13 +160,17 @@ class ManageCharacter(APIView):
             return Response(f"Error updating character: {e}", status=s.HTTP_400_BAD_REQUEST)
         
 
-
-    def delete(self,request):
+    def delete(self, request):
         try:
             user_account = request.user
             working_character = Character.objects.get(user_account=user_account)
-            working_character.dele
-            working_character
+            
+            # Delete the character's inventory items
+            Inventory.objects.filter(character=working_character).delete()
+            
+            # Now delete the character
+            working_character.delete()
+            return Response({"message": "Character deleted successfully."}, status=s.HTTP_204_NO_CONTENT)
         except Exception as e:
             traceback.print_exc()
             print(f"Error: {e}")

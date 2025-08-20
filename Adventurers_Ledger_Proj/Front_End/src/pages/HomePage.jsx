@@ -1,9 +1,8 @@
 import React from "react";
-
 import "../styles/HomePage.css";
 import Header from "../components/Header";
 import NavBar from "../components/NavBar";
-import Footer from "../components/Footer";
+import Layout from "../components/Layout";
 
 
 function HomePage() {
@@ -11,9 +10,10 @@ function HomePage() {
 
   return (
     <>
+      <Layout>
       <Header />
-      <NavBar />  
-      <Footer />
+      <NavBar />
+      </Layout> 
     </>
   );
 }
