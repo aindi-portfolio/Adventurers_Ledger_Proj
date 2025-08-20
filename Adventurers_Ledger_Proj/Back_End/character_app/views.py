@@ -5,13 +5,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status as s
 from rest_framework.response import Response
 from .serializers import InventorySerializer, Inventory, Character, CharacterSerializer
-from item_app.views import ItemSerializer, Item
+from item_app.views_EXPERIMENTAL import ItemSerializer, Item, ShopItem
 from user_app.models import UserAccount
-from item_app.models import Item
+
 import requests
 from item_app.utils import get_dice_average
 import traceback
 from .utils.levelingLogic import applyExperienceGain
+from django.db import transaction
 
 # Create your views here.
 class ManageCharacter(APIView):
@@ -244,21 +245,40 @@ class InventoryManager(APIView):
             item_name = request.data.get("item_name")
             quantity = int(request.data.get("quantity", 1))  # Can be positive or negative
 
-            item = Item.objects.get(name=item_name)
+            if not item_name:
+                return Response({"error": "item_name is required"}, status=s.HTTP_400_BAD_REQUEST)
+            if quantity == 0:
+                return Response({"error": "Quantity must not be zero"}, status=s.HTTP_400_BAD_REQUEST)
 
-            inventory_entry = Inventory.objects.get(character=character, item=item)
+            item = ShopItem.objects.filter(name=item_name).first()
 
+            with transaction.atomic():
+                try:
+                    inventory_entry = Inventory.objects.select_for_update().get(character=character, item=item)
+                except Inventory.DoesNotExist:
+                    if quantity < 0:
+                        return Response({"error": "Cannot sell item you do not own"}, status=s.HTTP_400_BAD_REQUEST)
+                    # Create new inventory entry if buying
+                    inventory_entry = Inventory.objects.create(character=character, item=item, quantity=0)
 
-            if quantity > 0:
-                inventory_entry.add(quantity)
-            else:
-                inventory_entry.sub(abs(quantity))
-
-            serializer = InventorySerializer(inventory_entry)
-            return Response(serializer.data, status=s.HTTP_200_OK)
+                if quantity > 0:
+                    inventory_entry.add(quantity)
+                    serializer = InventorySerializer(inventory_entry)
+                    return Response(serializer.data, status=s.HTTP_200_OK)
+                else:
+                    if inventory_entry.quantity < abs(quantity):
+                        return Response({"error": f"Not enough {item_name} to sell"}, status=s.HTTP_400_BAD_REQUEST)
+                    inventory_entry.sub(abs(quantity))
+                    if inventory_entry.quantity < 1:
+                        # The item was deleted, so don't serialize a deleted object
+                        return Response({"message": f"{item_name} removed from inventory."}, status=s.HTTP_200_OK)
+                    serializer = InventorySerializer(inventory_entry)
+                    return Response(serializer.data, status=s.HTTP_200_OK)
 
         except Character.DoesNotExist:
             return Response({"error": "Character not found"}, status=s.HTTP_404_NOT_FOUND)
+        except Item.DoesNotExist:
+            return Response({"error": "Item not found"}, status=s.HTTP_404_NOT_FOUND)
         except Exception as e:
             print(f"Error: {e}")
             return Response({"error": str(e)}, status=s.HTTP_400_BAD_REQUEST)

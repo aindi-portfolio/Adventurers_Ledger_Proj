@@ -5,7 +5,7 @@ import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status as s
-from .models import Item
+from .models import Item, ShopItem
 from .serializers import ItemSerializer
 from .utils_EXPERIMENTAL import get_dice_average
 

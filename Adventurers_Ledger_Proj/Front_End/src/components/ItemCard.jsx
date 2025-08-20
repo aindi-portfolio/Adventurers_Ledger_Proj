@@ -1,11 +1,11 @@
 import React from "react";
-import Buy_or_Sell_Item from "./BuySellLogic";
+import Buy_or_Sell_Item from "../services/BuySellLogic";
 
 const ItemCard = ({ item }) => {
 
     // Function to handle buying or selling an item
     const handleBuyOrSell = (action, item) => {
-        Buy_or_Sell_Item(action, item.name);
+        Buy_or_Sell_Item(action, item);
     }
 
   return (

@@ -41,7 +41,7 @@ export default function ShopPage() {
             <div className="items-list flex flex-wrap justify-center gap-6">
             {shopItems && shopItems.length > 0 ? (
                   shopItems.map((item) => (
-                    <ItemCard key={item.id} item={item} />
+                    <ItemCard key={item.name} item={item} />
                 ))
             ) : (
                 <p>No items available in the shop.</p>
