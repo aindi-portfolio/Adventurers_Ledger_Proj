@@ -47,9 +47,11 @@ class Inventory(models.Model):
         if amount < 1:
             raise ValueError("Amount must be at least 1")
         if self.quantity - amount < 1:
+            print(f"Deleting inventory entry for {self.item.name}")
             return self.delete()
         self.quantity -= amount
         self.save()
+
     
     def add_item(self, item):
         self.item = item

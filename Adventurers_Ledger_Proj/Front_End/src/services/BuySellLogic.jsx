@@ -21,6 +21,8 @@ export default async function Buy_or_Sell_Item(action, item ) {
                         "Content-Type": "application/json" }
                 }
             );
+            console.log("Response from server:", response.data);
+            console.log(`Status code: ${response.status}`);
             if (response.status === 200) {
                 alert(`You have successfully ${action === "buy" ? "bought" : "sold"} ${item.name}!`);
             } else {

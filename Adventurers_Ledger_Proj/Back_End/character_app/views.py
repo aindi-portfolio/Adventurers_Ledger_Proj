@@ -237,40 +237,57 @@ class InventoryManager(APIView):
         except Exception as e:
             print(f"Error: {e}")
             return Response({"error": str(e)}, status=s.HTTP_400_BAD_REQUEST)
-        
+
 
     def put(self, request):
         try:
+            print("Request data:", request.data)
+
             character = Character.objects.get(user_account=request.user)
             item_name = request.data.get("item_name")
-            quantity = int(request.data.get("quantity", 1))  # Can be positive or negative
+            quantity = int(request.data.get("quantity", 1))
 
+            if not request.user.is_authenticated:
+                return Response({"error": "Authentication required"}, status=s.HTTP_401_UNAUTHORIZED)
             if not item_name:
                 return Response({"error": "item_name is required"}, status=s.HTTP_400_BAD_REQUEST)
             if quantity == 0:
                 return Response({"error": "Quantity must not be zero"}, status=s.HTTP_400_BAD_REQUEST)
 
-            item = ShopItem.objects.filter(name=item_name).first()
-
             with transaction.atomic():
-                try:
-                    inventory_entry = Inventory.objects.select_for_update().get(character=character, item=item)
-                except Inventory.DoesNotExist:
-                    if quantity < 0:
-                        return Response({"error": "Cannot sell item you do not own"}, status=s.HTTP_400_BAD_REQUEST)
-                    # Create new inventory entry if buying
-                    inventory_entry = Inventory.objects.create(character=character, item=item, quantity=0)
-
                 if quantity > 0:
+                    # BUY: Reference from ShopInventory
+                    try:
+                        shop_entry = ShopItem.objects.select_related('item').get(item__name=item_name)
+                        item = shop_entry.item
+                    except ShopItem.DoesNotExist:
+                        return Response({"error": "Item not available in shop"}, status=s.HTTP_404_NOT_FOUND)
+
+                    inventory_entry, created = Inventory.objects.get_or_create(
+                        character=character,
+                        item=item,
+                        defaults={"quantity": 0}
+                    )
                     inventory_entry.add(quantity)
                     serializer = InventorySerializer(inventory_entry)
                     return Response(serializer.data, status=s.HTTP_200_OK)
+
                 else:
+                    # SELL: Reference from character's own inventory
+                    try:
+                        inventory_entry = Inventory.objects.select_related('item').get(character=character, item__name=item_name)
+                    except Inventory.DoesNotExist:
+                        return Response({"error": "You do not own this item"}, status=s.HTTP_400_BAD_REQUEST)
                     if inventory_entry.quantity < abs(quantity):
                         return Response({"error": f"Not enough {item_name} to sell"}, status=s.HTTP_400_BAD_REQUEST)
-                    inventory_entry.sub(abs(quantity))
+
+                    try:
+                        inventory_entry.sub(abs(quantity))
+                    except ValueError as e:
+                        print(f"Error subtracting quantity: {e}")
+                        return Response({"error": str(e)}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
                     if inventory_entry.quantity < 1:
-                        # The item was deleted, so don't serialize a deleted object
+                        # The item was deleted
                         return Response({"message": f"{item_name} removed from inventory."}, status=s.HTTP_200_OK)
                     serializer = InventorySerializer(inventory_entry)
                     return Response(serializer.data, status=s.HTTP_200_OK)
