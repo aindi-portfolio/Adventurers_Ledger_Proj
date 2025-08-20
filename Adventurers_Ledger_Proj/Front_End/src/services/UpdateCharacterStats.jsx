@@ -1,7 +1,12 @@
 import axios from "axios";
+import handleCharacterDeath from "./DeleteCharacter";
 
 export default async function updateCharacterStats(health, experience=0, gold=0) {
     try {
+        if (health <= 0) {
+            await handleCharacterDeath();
+            return;
+        }
         const token = localStorage.getItem("authToken");
         const response = await axios.put('http://localhost:8000/api/character/manage-character',
         {

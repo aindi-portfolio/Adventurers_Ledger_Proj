@@ -87,13 +87,15 @@ const QuestPage = () => {
       // Update character stats when quest is complete
       const updateStats = async () => {
         try {
-          character.health += questFinally.health_change; // If quest failed, restore health
-          character.gold += questFinally.gold_change; // If quest failed, restore gold
-          character.experience += questFinally.exp_change; // If quest failed, restore experience
-          const updatedCharacter = await updateCharacterStats(health=health, gold=gold, experience=experience);
-          setCharacter(updatedCharacter);
-          console.log("Updated character stats:", updatedCharacter);
-          setQuestComplete(false); // reset for next quest
+          if (character && questFinally) {
+            character.health += questFinally.health_change;
+            character.gold += questFinally.gold_change;
+            character.experience += questFinally.exp_change;
+          }
+          const updatedCharacter = await updateCharacterStats(character.health, character.experience, character.gold);          
+          // setCharacter(updatedCharacter);
+          // console.log("Updated character stats:", updatedCharacter);
+          // setQuestComplete(false); // reset for next quest
         } catch (err) {
           console.error("Failed to update character stats:", err);
         }
@@ -116,6 +118,9 @@ const QuestPage = () => {
   const restartQuest = () => {
     setQuest(null);
     fetchQuestDB();
+    setQuestFinally(null);
+    setQuestComplete(false);
+    window.location.reload(); // Reload the page to reset state
   };
 
   return (
@@ -172,6 +177,11 @@ const QuestPage = () => {
                         <p className="mt-2 text-sm">Health Change: {questFinally.health_change}</p>
                         <p className="text-sm">Gold Change: {questFinally.gold_change}</p>
                         <p className="text-sm">Quest Complete: {questFinally.quest_complete ? "Yes" : "No"}</p>
+                        <button
+                          className="mt-4 px-4 py-2 bg-green-600 text-white rounded"
+                          onClick={restartQuest}>
+                          Restart Quest
+                        </button>
                       </div>
                     )
                   }
