@@ -13,10 +13,14 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv('.env')  # Load environment variables from .env file
+import environ
 import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))  # Load environment variables from .env file
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 
 
 # Quick-start development settings - unsuitable for production
@@ -93,9 +97,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'adventurers_ledger',
-        'USER': 'adventurer',
-        'PASSWORD': os.environ.get("RDS_PASSWORD"),
-        'HOST': 'adventurers-ledger-db.cv8c0k8ka6x5.us-east-2.rds.amazonaws.com',
+        'USER': env("RDS_USER"),
+        'PASSWORD': env("RDS_PASSWORD"),
+        'HOST': env("RDS_HOST"),
         'PORT': '5432',
     }
 }
