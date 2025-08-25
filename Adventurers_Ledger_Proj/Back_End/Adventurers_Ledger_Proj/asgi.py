@@ -1,5 +1,5 @@
 """
-ASGI config for Local_Hunter_Proj project.
+ASGI config for Adventurers_Ledger_Proj project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

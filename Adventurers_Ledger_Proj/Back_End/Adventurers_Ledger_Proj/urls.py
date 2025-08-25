@@ -1,5 +1,5 @@
 """
-URL configuration for Local_Hunter_Proj project.
+URL configuration for Adventurers_Ledger_Proj project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
