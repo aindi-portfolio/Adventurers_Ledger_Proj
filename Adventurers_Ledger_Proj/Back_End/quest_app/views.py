@@ -35,7 +35,7 @@ class QuestView(APIView):
 class GenQuestView(APIView):
     def post(self, request):
         # Generate story intro using OpenRouter
-        OPENROUTER_API_KEY = os.environ.get("DEEPSEEK_FREE")  # Update your .env key name
+        OPENROUTER_API_KEY = os.environ.get("GEMINI_KEY")  # Update your .env key name
 
         quest_title = request.data.get("quest_title")
         quest_description = request.data.get("quest_description")
@@ -69,7 +69,7 @@ class GenQuestView(APIView):
                     "X-Title": "QuestEngine",  # Optional
                 },
                 data=json.dumps({
-                    "model": "deepseek/deepseek-r1-0528:free",
+                    "model": "tngtech/deepseek-r1t2-chimera:free",
                     "messages": [
                         {
                             "role": "user",
@@ -101,7 +101,7 @@ class AdvanceQuestView(APIView):
     """
 
     def post(self, request):
-        OPENROUTER_API_KEY = os.environ.get("DEEPSEEK_FREE")  # Update your .env key name
+        OPENROUTER_API_KEY = os.environ.get("GEMINI_KEY")  # Update your .env key name
         
         print("Incoming Payload:", request.data)
         quest_data = request.data.get("quest") # This is the response from GenQuestView
@@ -150,7 +150,7 @@ class AdvanceQuestView(APIView):
                     "Content-Type": "application/json"
                 },
                 data=json.dumps({
-                    "model": "deepseek/deepseek-r1-0528:free",
+                    "model": "tngtech/deepseek-r1t2-chimera:free",
                     "messages": [
                         {
                             "role": "user",

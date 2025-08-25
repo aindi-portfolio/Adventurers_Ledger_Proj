@@ -48,7 +48,7 @@ class ShopItem(models.Model):
     This model represents an item available in the shop.
     """
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='shop_items')
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=5.00)
     stock = models.IntegerField(default=1)
 
     def __str__(self):

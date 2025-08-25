@@ -1,11 +1,12 @@
 import axios from "axios";
 
-const fetchShopItem = async (fetch_count=1) => {
+const fetchShopItem = async (fetch_count=1, recycle=false) => {
     try {
         const token = localStorage.getItem('authToken');
         const response = await axios.post('http://localhost:8000/api/items/add-to-shop',
             {
                 "count": fetch_count,
+                "recycle": recycle
             },
             {
             headers: {

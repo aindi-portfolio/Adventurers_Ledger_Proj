@@ -12,27 +12,36 @@ from .utils_EXPERIMENTAL import get_dice_average
 API_BASE_URL = "https://www.dnd5eapi.co"
 
 class GetItemByNameView(APIView):
-    """
-    GET /item-by-name/
-    Fetches item details by name from the D&D API and returns it in JSON format.
-    """
-
+    
     def get(self, request):
-        item_name = request.query_params.get('name')
+        """
+        GET /item-by-name/
+        Fetches item details by name from the D&D API and returns it in JSON format.
+        """
+        # 1. Check if the 'name' is provided in the request.data.get('name')
+        item_name = request.data.get('name')
         if not item_name:
             return Response({"error": "Item name is required."}, status=s.HTTP_400_BAD_REQUEST)
-
-        item_url = f"{API_BASE_URL}/api/2014/equipment/{item_name.lower().replace(' ', '-')}"
-        response = requests.get(item_url)
-
-        if response.status_code != 200:
+        
+        # 2. Check if the item already exists in the database
+        if Item.objects.filter(name__iexact=item_name).exists():
+            item = Item.objects.get(name__iexact=item_name)
+            serializer = ItemSerializer(item)
+            return Response(serializer.data, status=s.HTTP_200_OK) # Returns in JSON format
+        # 3. If doesn't exist in DB, fetch from the D&D API
+        else:
+            item_url = f"{API_BASE_URL}/api/2014/equipment/{item_name.lower().replace(' ', '-')}"
+            response = requests.get(item_url)
+            # If the item is not found, return a 404 response
+        if response.status_code == 404:
             return Response({"error": "Item not found."}, status=s.HTTP_404_NOT_FOUND)
-
-        item_data = response.json()
-        serializer = ItemSerializer(data=item_data)
-        serializer.is_valid(raise_exception=True)
-
+        # 4. If the item is found, serialize the data and return it in JSON format
+        if response.status_code != 200:
+            return Response({f"Error, failed to fetch: {response.status_code}"}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
+        # 5. If the item is found, serialize the data and return it in JSON format
+        serializer = ItemSerializer(data=response.json())
         return Response(serializer.data, status=s.HTTP_200_OK)
+
 
 
 class GetRandomItem(APIView):
@@ -40,7 +49,7 @@ class GetRandomItem(APIView):
     def get(self, request):
         try:
             item_list = []
-            count = int(request.query_params.get('count', 1))
+            count = request.query_params.get('count', 1)
             while len(item_list) < count:
                 # Fetch a random item from the database making sure that they don't repeat
                 items = Item.objects.order_by('?')[:count]
@@ -57,45 +66,6 @@ class GetRandomItem(APIView):
             return Response({"error": "An error occurred while fetching random items."}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
 
         
-## Add item to the Shop
-class AddItemToShopView(APIView):
-    """
-    POST /add-item-to-shop
-    Fetch 10 items randomly from the db and add them to the shop with a random price and stock.
-    Then return json response with the items that were added to the shop.
-    """
-    
-    def post(self, request):
-        try:
-            requested_count = int(request.data.get('count', 10))
-            existing_shop_items = ShopItem.objects.all()
-            if existing_shop_items.count() >= requested_count:
-                
-                serializer = ShopItemSerializer(existing_shop_items, many=True)
-                
-                return Response(serializer.data, status=s.HTTP_200_OK)
-
-            count = requested_count - existing_shop_items.count()
-            items = Item.objects.order_by('?')[:count]
-            if not items:
-                return Response({"error": "No items available to add to the shop."}, status=s.HTTP_404_NOT_FOUND)
-
-            shop_items = []
-            for item in items:
-                price = max(1, int(item.cost_amount))  # Ensure price is at least 1
-                stock = 1  # Default stock to 1, can be randomized if needed
-                shop_item = ShopItem(item=item, price=price, stock=stock)
-                shop_items.append(shop_item)
-
-            ShopItem.objects.bulk_create(shop_items)
-
-            serializer = ItemSerializer(shop_items, many=True)
-            return Response(serializer.data, status=s.HTTP_201_CREATED)
-        except Exception as e:
-            print(f"Error occurred while adding items to the shop: {e}")
-            return Response({"error": "An error occurred while adding items to the shop."}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 class SeedItemsView(APIView):
     def post(self, request):
         EQUIPMENT_CATEGORIES = ['weapon', 'armor', 'potion', 'tools']
@@ -154,3 +124,53 @@ class SeedItemsView(APIView):
             Item.objects.bulk_create(new_items)
 
         return Response(f"{len(new_items)} new items added to the database.", status=s.HTTP_201_CREATED)
+
+
+
+
+class AddItemToShopView(APIView):
+    """
+    POST /add-item-to-shop
+    If the shop already has items, it will return those items.
+        Unless the user clicks the "Recycle" button.
+    Based on the count parameter, this view will take items from the Item model and add them to the ShopItem model until the counter is reached.
+        If the ShopItem model already has one of the items, it will increase the quantity of that item and continue to the next item.
+    """
+    def post(self, request):
+        try:
+            # Check for 'recycle' in the request data
+            if request.data.get('recycle') == 'true':
+                ShopItem.objects.all().delete()  # Drop all data in ShopItem model
+
+            count = int(request.data.get('count', 1))
+            if count <= 0:
+                return Response({"error": "Count must be a positive integer."}, status=s.HTTP_400_BAD_REQUEST)
+
+            shop_items = ShopItem.objects.all()
+            if shop_items.exists():
+                # If items already exist in the shop, return them
+                serializer = ShopItemSerializer(shop_items, many=True)
+                return Response(serializer.data, status=s.HTTP_200_OK)
+
+            # Fetch items from the Item model
+            items = Item.objects.order_by('?')[:count]
+            if not items:
+                return Response({"error": "No items available to add to the shop."}, status=s.HTTP_404_NOT_FOUND)
+
+            new_shop_items = []
+            for item in items:
+                shop_item, created = ShopItem.objects.get_or_create(
+                    item=item,
+                    defaults={'quantity': 1}
+                )
+                if not created:
+                    shop_item.quantity += 1
+                    shop_item.save()
+                new_shop_items.append(shop_item)
+
+            serializer = ShopItemSerializer(new_shop_items, many=True)
+            return Response(serializer.data, status=s.HTTP_201_CREATED)
+
+        except Exception as e:
+            print(f"Error occurred while adding items to the shop: {e}")
+            return Response({"error": "An error occurred while adding items to the shop."}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)

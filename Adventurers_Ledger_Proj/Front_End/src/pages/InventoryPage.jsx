@@ -3,6 +3,7 @@ import { GlobalStateContext } from "../context/GlobalStateContext";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import fetchInventory from "../services/FetchInventory";
+import '../styles/InventoryPage.css';
 
 export default function Inventory() {
     const {items, setItems} = useContext(GlobalStateContext);

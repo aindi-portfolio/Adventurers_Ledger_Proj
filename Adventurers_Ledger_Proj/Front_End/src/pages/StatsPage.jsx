@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import fetchCharacterStats from "../services/FetchStats";
+import "../styles/StatsPage.css"; // Assuming you have a CSS file for styling the stats page
 
 
 export default function StatsPage() {

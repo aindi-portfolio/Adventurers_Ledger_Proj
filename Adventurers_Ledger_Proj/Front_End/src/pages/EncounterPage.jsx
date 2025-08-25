@@ -8,6 +8,7 @@ import fetchCharacterStats from '../services/FetchStats';
 import fetchMonster from '../services/FetchMonster';
 import { useAttack } from '../services/EncounterActions';
 import fetchInventory from '../services/FetchInventory';
+import '../styles/EncounterPage.css'; // Assuming you have a CSS file for styles
 
 
 export default function EncounterPage() {

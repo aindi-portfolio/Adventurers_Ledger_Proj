@@ -6,31 +6,53 @@ import fetchShopItem from "../services/FetchShopItems";
 import ItemCardShop from "../components/ItemCardShop";
 import ItemCardShopInventory from "../components/ItemCardShopInventory";
 import Layout from "../components/Layout";
-
+import "../styles/ShopPage.css"; // Assuming you have a CSS file for styling the shop page
 
 export default function ShopPage() {
     const { isAuthenticated, setIsAuthenticated, character, setCharacter, items, setItems } = useContext(GlobalStateContext);
     const [shopItems, setShopItems] = useState([]);
     const [itemCount, setItemCount] = useState(0);
 
-    useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-          alert('You must be logged in to view character stats.');
-          window.location.href = '/';
-        } else {
-          setIsAuthenticated(true);
-          const count = 10 - shopItems.length;
-      
-          const loadItems = async () => {
-            const newItems = await fetchShopItem(count);
-            if (newItems) setShopItems(prev => [...prev, ...newItems]);
-          };
-      
-          if (count > 0) loadItems();
+    // Handle for fetch items from the ShotItem mode in DB
+    const handleFetchShopItems = async () => {
+        try {
+            // Get the count of items in the shop
+            // If the itemCount is less than 10, fetch items from the shop
+            if (itemCount >= 10) {
+                console.log("Item count is sufficient, no need to fetch more items.");
+                return;
+            }
+            let count = 10 - itemCount; // Calculate how many items to fetch
+            console.log("Fetching shop items...");
+            const data = await fetchShopItem({ fetch_count: count, recycle: false });
+            setShopItems(data);
+            setItemCount(data.length);
+            console.log("Fetched shop items:", data);
+        } catch (error) {
+            console.error("Error fetching shop items:", error);
         }
-      }, [shopItems.length]);
-      
+    };
+
+    //Handle force fetch items from the shop
+    const handleForceFetchShopItems = async () => {
+        try {
+            console.log("Force fetching shop items...");
+            const data = await fetchShopItem({ fetch_count: 10, recycle: true });
+            setShopItems(data);
+            setItemCount(data.length);
+            console.log("Force fetched shop items:", data);
+        } catch (error) {
+            console.error("Error force fetching shop items:", error);
+        }
+    };
+
+
+    // Fetch shop items from the API when the component mounts or when the shopItems state changes
+    useEffect(() => {
+        handleFetchShopItems();
+    }, [itemCount]);
+    
+
 
     return (
         <>

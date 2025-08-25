@@ -1,5 +1,6 @@
 import React from "react";
 import Buy_or_Sell_Item from "../services/BuySellLogic";
+import "../styles/ItemCardShop.css"; // Assuming you have a CSS file for styling the item card
 
 const ItemCardShop = ({ item }) => {
 

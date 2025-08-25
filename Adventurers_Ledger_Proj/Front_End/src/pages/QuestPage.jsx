@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import fetchCharacterStats from "../services/FetchStats";
 import updateCharacterStats from "../services/UpdateCharacterStats";
+import "../styles/QuestPage.css"; // Assuming you have a CSS file for styling
 
 const QuestPage = () => {
   const { character, setCharacter, isAuthenticated, setIsAuthenticated } = useContext(GlobalStateContext);

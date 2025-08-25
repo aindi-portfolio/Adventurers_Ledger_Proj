@@ -1,0 +1,154 @@
+/* Shared Item Card styles for Shop and Inventory — minimal, adaptive */
+:root {
+    --color-wood: #2e221f;
+    --color-gold: #d4af37;
+    --color-parchment: #f5ecd9;
+    --color-accent: #8c6a2f;
+    --font-heading: ui-serif, Georgia, "Times New Roman", serif;
+    --font-body: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+  }
+  
+  .item-card {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 14px;
+    background:
+      linear-gradient(180deg, rgba(245, 236, 217, 0.12), rgba(245, 236, 217, 0.06)),
+      rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(140,106,47,0.32);
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,0.04),
+      0 6px 18px rgba(0,0,0,0.25);
+    color: var(--color-gold);
+    font-family: var(--font-body);
+    min-width: 0;
+  }
+  
+  .item-card__header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    min-width: 0;
+  }
+  
+  .item-card__media {
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(140,106,47,0.35);
+  }
+  .item-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .item-card__title {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    letter-spacing: 0.01em;
+    line-height: 1.25;
+    min-width: 0;
+  }
+  .item-card__subtitle {
+    color: rgba(245, 236, 217, 0.85);
+    font-size: 0.92rem;
+  }
+  
+  .item-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    color: rgba(245, 236, 217, 0.85);
+    font-size: 0.92rem;
+  }
+  
+  .item-card__desc {
+    color: rgba(245, 236, 217, 0.9);
+    font-size: 0.95rem;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .item-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .badge {
+    border: 1px solid rgba(140,106,47,0.35);
+    background: rgba(255,255,255,0.05);
+    color: rgba(245, 236, 217, 0.9);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+  }
+  
+  .item-card__footer {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  @media (min-width: 520px) {
+    .item-card__footer {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+  }
+  
+  .price {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+  }
+  
+  /* Shop vs Inventory subtle variants if desired */
+  .item-card--shop .price {
+    color: var(--color-gold);
+  }
+  .item-card--inventory .price {
+    color: rgba(245, 236, 217, 0.92);
+  }
+  
+  /* Compact buttons row without overriding your Button component style */
+  .item-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  
+  /* Accessible detail toggle for extra stats */
+  .item-card details {
+    border-top: 1px solid rgba(140,106,47,0.28);
+    padding-top: 8px;
+  }
+  .item-card summary {
+    cursor: pointer;
+    color: rgba(245,236,217,0.9);
+    list-style: none;
+  }
+  .item-card summary::-webkit-details-marker {
+    display: none;
+  }
+  .item-card summary::after {
+    content: "▾";
+    margin-left: 6px;
+    opacity: 0.7;
+  }
+  details[open] summary::after {
+    transform: rotate(180deg);
+    display: inline-block;
+  }
+  
+  /* Reduce visual busyness: consistent spacing, no heavy borders on children */
+  .item-card *:not(img) {
+    max-width: 100%;
+  }

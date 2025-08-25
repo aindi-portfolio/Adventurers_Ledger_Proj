@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from .serializers import InventorySerializer, Inventory, Character, CharacterSerializer
 from item_app.views_EXPERIMENTAL import ItemSerializer, Item, ShopItem
 from user_app.models import UserAccount
-
 import requests
 from item_app.utils import get_dice_average
 import traceback
@@ -19,119 +18,145 @@ class ManageCharacter(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-
+   
     def post(self, request): # Make a new character, give it starting items based on class selection
-
-        STARTER_ITEMS_FOR_CLASSES = [ # For future class selection, these are the starter item by name (not index in D&D API)
-                {
-                    "class": "barbarian",
-                    "items":
-                        {
-                            "Handaxe": 2,
-                            "Chain Mail": 1
-                        } # Future enhancement: let user select class and starting weapon
-                },
-                {
-                    "class": "fighter",
-                    "items":
-                        {
-                            "Longsword": 1,
-                            "Shield": 1,
-                            "Chain Mail": 1
-                        }
-                },
-                {
-                    "class": "wizard",
-                    "items":
-                        {
-                            "Quarterstaff": 1,
-                            "Spellbook": 1,
-                            "Component Pouch": 1
-                        } # Build is in progress, will be added later
-                },
-                {
-                    "class": "rogue",
-                    "items":
-                        {
-                            "Shortsword": 1,
-                            "Dagger": 1,
-                            "Leather Armor": 1
-                        }
-                }
-            ]
+        STARTER_ITEMS_FOR_CLASSES = {
+            "barbarian": {"Greataxe": 1, "Handaxe": 2, "Hide Armor": 1},
+            "fighter": {"Longsword": 1, "Shield": 1, "Chain Mail": 1},
+            "wizard": {"Quarterstaff": 1, "Spellbook": 1, "Component Pouch": 1},
+            "rogue": {"Shortsword": 1, "Dagger": 1, "Leather Armor": 1},
+        }
         
+        """
+        This post method creates a new character for the authenticated user.
+        The user can have multiple characters as long as they don't match the same name and class.
+        The character is created with a name and class, and starter items are added based on the class selection.
+        The character's inventory is populated with items fetched from the D&D API based on the class.
+        If the character already exists with the same name and class, an error is returned.
+        """
         try:
             user_account = request.user
-            # Check if the user_account already has a character with the same character_class and name
-            if Character.objects.filter(
-                user_account=user_account,
-                name=request.data.get('name'),
-                character_class=request.data.get('character_class')
-            ).exists():
-                return Response(
-                    {"message": "Character with this name and class already exists."},
-                    status=s.HTTP_400_BAD_REQUEST
-                )
+            # Validate user authentication
+            if not user_account.is_authenticated:
+                return Response({"error": "User not authenticated"}, status=s.HTTP_401_UNAUTHORIZED)
 
-
-
-            name = request.data.get('name')
+            # Extract character data from the request
+            character_name = request.data.get('name')
             character_class = request.data.get('character_class')
 
-            if not name or not character_class:
-                return Response({"message": "Missing required fields."}, status=s.HTTP_400_BAD_REQUEST)
+            # Validate required fields
+            if not character_name or not character_class:
+                return Response({"error": "Name and class are required fields."}, status=s.HTTP_400_BAD_REQUEST)
 
-            # Step 1: Create the character
-            character = Character.objects.create(
+            # Check if the user_account already has a character with the same class and name
+            if Character.objects.filter(user_account=user_account, name=character_name, character_class=character_class).exists():
+                return Response({"error": "Character already exists"}, status=s.HTTP_400_BAD_REQUEST)
+
+            # Get starter items for the selected class
+            starter_items = STARTER_ITEMS_FOR_CLASSES.get(character_class.lower())
+            if not starter_items:
+                return Response({"error": f"Invalid character class: {character_class}"}, status=s.HTTP_400_BAD_REQUEST)
+
+
+
+            # Create the new character
+            new_character = Character.objects.create(
                 user_account=user_account,
-                name=name,
-                character_class=character_class
+                name=character_name,
+                character_class=character_class,
+                inventory=starter_items  # Assuming inventory is a JSON field in the Character model
             )
-            character.save()
 
-            # Step 2: Fetch item data from the D&D API based on the character class and starter items
-            class_entry_match = next((item for item in STARTER_ITEMS_FOR_CLASSES if item['class'] == character_class.lower()), None)
-            
-            if class_entry_match:
-                for item_name, quantity in class_entry_match['items'].items(): # item_name is the name of the item, quantity is how many to add to the inventory
-                    item_name_slug = item_name.lower().replace(' ', '-') # Convert item name to slug format for API URL
-                    item_obj = Item.objects.filter(name=item_name).first()
-
-                    if not item_obj: # If the item does not exist in the database, fetch it from the D&D API
-                        item = requests.get(f"https://www.dnd5eapi.co/api/equipment/{item_name_slug}")
-
-                        item_data = item.json()
-                        damage_dice = item_data.get('damage', {}).get('damage_dice')
-                        item_obj, _ = Item.objects.get_or_create(
-                            name=item_data['name'],
-                            defaults = {
-                                'item_category': item_data.get('equipment_category', {}).get('name', 'Unknown'),
-                                'damage': get_dice_average(damage_dice) if damage_dice else 0,
-                                'armor_class': item_data.get('armor_class', {}).get('base', 0),
-                                'healing': 0,
-                                'rarity': item_data.get('rarity', {}).get('name', 'common'),
-                                'description': item_data.get('desc', 'No description available.'),
-                                'cost_amount': item_data.get('cost', {}).get('quantity', 0),
-                                'cost_unit': item_data.get('cost', {}).get('unit', 'gp'),
-                                'is_starter': True
-                            }
-                        )
-                        item_obj.save() # Save it to the database
-
-                        if item.status_code != 200:
-                            return Response({"message": f"Failed to fetch starter item data for {item_name}."}, status=s.HTTP_502_BAD_GATEWAY)
-
-                    # Step 3: Add the item and its quantity to the character's inventory
-                    Inventory.objects.create(character=character, item=item_obj, quantity=quantity)
-
-            # Step 4: Serialize the character and return the response
-            serialized_character = CharacterSerializer(character)
-            return Response(serialized_character.data, status=s.HTTP_201_CREATED)
+            # Return the created character's details
+            return Response(
+                {
+                    "message": "Character created successfully",
+                    "character": {
+                        "id": new_character.id,
+                        "name": new_character.name,
+                        "class": new_character.character_class,
+                        "inventory": new_character.inventory,
+                    },
+                },
+                status=s.HTTP_201_CREATED,
+            )
 
         except Exception as e:
-            print("Exception during character creation:", e)
-            traceback.print_exc()
-            return Response({"message": str(e)}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+
+        # try:
+        #     user_account = request.user
+        #     # Validate user authentication
+        #     if not user_account.is_authenticated:
+        #         return Response({"error": "User not authenticated"}, status=401)
+
+        #     # Check if the user_account already has a character with the same class and name
+        #     if Character.objects.filter(user_account=user_account, name=request.data.get('name'), character_class=request.data.get('character_class')).exists():
+        #         return Response({"error": "Character already exists"}, status=400)
+        # except Exception as e:
+        #     return Response({"error": str(e)}, status=500)
+
+
+        # try:
+        #     name = request.data.get('name')
+        #     character_class = request.data.get('character_class')
+
+        #     if not name or not character_class:
+        #         return Response({"message": "Missing required fields."}, status=s.HTTP_400_BAD_REQUEST)
+
+        #     # Step 1: Create the character
+        #     character = Character.objects.create(
+        #         user_account=user_account,
+        #         name=name,
+        #         character_class=character_class
+        #     )
+        #     character.save()
+
+        #     # Step 2: Fetch item data from the D&D API based on the character class and starter items
+        #     class_entry_match = next((item for item in STARTER_ITEMS_FOR_CLASSES if item['class'] == character_class.lower()), None)
+            
+        #     if class_entry_match:
+        #         for item_name, quantity in class_entry_match['items'].items(): # item_name is the name of the item, quantity is how many to add to the inventory
+        #             item_name_slug = item_name.lower().replace(' ', '-') # Convert item name to slug format for API URL
+        #             item_obj = Item.objects.filter(name=item_name).first()
+
+        #             if not item_obj: # If the item does not exist in the database, fetch it from the D&D API
+        #                 item = requests.get(f"https://www.dnd5eapi.co/api/equipment/{item_name_slug}")
+
+        #                 item_data = item.json()
+        #                 damage_dice = item_data.get('damage', {}).get('damage_dice')
+        #                 item_obj, _ = Item.objects.get_or_create(
+        #                     name=item_data['name'],
+        #                     defaults = {
+        #                         'item_category': item_data.get('equipment_category', {}).get('name', 'Unknown'),
+        #                         'damage': get_dice_average(damage_dice) if damage_dice else 0,
+        #                         'armor_class': item_data.get('armor_class', {}).get('base', 0),
+        #                         'healing': 0,
+        #                         'rarity': item_data.get('rarity', {}).get('name', 'common'),
+        #                         'description': item_data.get('desc', 'No description available.'),
+        #                         'cost_amount': item_data.get('cost', {}).get('quantity', 0),
+        #                         'cost_unit': item_data.get('cost', {}).get('unit', 'gp'),
+        #                         'is_starter': True
+        #                     }
+        #                 )
+        #                 item_obj.save() # Save it to the database
+
+        #                 if item.status_code != 200:
+        #                     return Response({"message": f"Failed to fetch starter item data for {item_name}."}, status=s.HTTP_502_BAD_GATEWAY)
+
+        #             # Step 3: Add the item and its quantity to the character's inventory
+        #             Inventory.objects.create(character=character, item=item_obj, quantity=quantity)
+
+        #     # Step 4: Serialize the character and return the response
+        #     serialized_character = CharacterSerializer(character)
+        #     return Response(serialized_character.data, status=s.HTTP_201_CREATED)
+
+        # except Exception as e:
+        #     print("Exception during character creation:", e)
+        #     traceback.print_exc()
+        #     return Response({"message": str(e)}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
     ## Update the character attributes (like level, experience, health, gold)

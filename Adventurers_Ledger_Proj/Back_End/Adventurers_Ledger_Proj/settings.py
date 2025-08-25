@@ -92,7 +92,11 @@ WSGI_APPLICATION = 'Adventurers_Ledger_Proj.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'adventurers_db',
+        'NAME': 'adventurers_ledger',
+        'USER': 'adventurer',
+        'PASSWORD': os.environ.get("RDS_PASSWORD"),
+        'HOST': 'adventurers-ledger-db.cv8c0k8ka6x5.us-east-2.rds.amazonaws.com',
+        'PORT': '5432',
     }
 }
 
