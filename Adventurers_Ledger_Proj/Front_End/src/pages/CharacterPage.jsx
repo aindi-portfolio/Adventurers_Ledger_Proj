@@ -7,12 +7,15 @@ export default function CharacterPage() {
     const nameRef = useRef(null);
     const classRef = useRef(null);
 
+    const API_BASE = import.meta.env.VITE_API_URL; // Adjust the API base URL as needed
+
+
     // Function to handle character creation
     async function Create_Character(characterData) {
         try {
             const token = localStorage.getItem('authToken');
             const response = await axios.post(
-                'http://localhost:8000/api/character/manage-character',
+                `${API_BASE}/character/manage-character`,
                 characterData,
                 {
                     headers: {

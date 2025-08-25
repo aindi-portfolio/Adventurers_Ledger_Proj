@@ -3,12 +3,14 @@ import handleCharacterDeath from "./DeleteCharacter";
 
 export default async function updateCharacterStats(health, experience=0, gold=0) {
     try {
+        const API_BASE = import.meta.env.VITE_API_URL; // Adjust the API base URL as needed
+
         if (health <= 0) {
             await handleCharacterDeath();
             return;
         }
         const token = localStorage.getItem("authToken");
-        const response = await axios.put('http://localhost:8000/api/character/manage-character',
+        const response = await axios.put(`${API_BASE}/character/manage-character`,
         {
             "health": health,
             "experience": experience,

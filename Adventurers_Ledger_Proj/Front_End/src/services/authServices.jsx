@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE = 'http://localhost:8000/api'; // Adjust the API base URL as needed
+const API_BASE = import.meta.env.VITE_API_URL; // Adjust the API base URL as needed
 
 const Sign_Up = async (userData) => { // userData has email and password
     try {

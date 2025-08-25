@@ -1,9 +1,12 @@
 import axios from "axios";
 
+const API_BASE = import.meta.env.VITE_API_URL; // Adjust the API base URL as needed
+
+
 const SeedItems = async () => {
 
     try {
-    const response = await axios.post("http://localhost:8000/api/items/seed", {}, {
+    const response = await axios.post(`${API_BASE}/items/seed`, {}, {
         headers: {
         Authorization: `Token ${localStorage.getItem("authToken")}`,
         "Content-Type": "application/json",
@@ -18,7 +21,7 @@ const SeedItems = async () => {
 
 const SeedMonsters = async (character_level) => {
     try {
-        const response = await axios.post("http://localhost:8000/api/monsters/seed-monsters", {
+        const response = await axios.post(`${API_BASE}/monsters/seed-monsters`, {
             character_level: character_level,
         }, {
             headers: {

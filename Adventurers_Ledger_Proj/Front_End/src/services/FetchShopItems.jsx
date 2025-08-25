@@ -2,8 +2,10 @@ import axios from "axios";
 
 const fetchShopItem = async (fetch_count=1, recycle=false) => {
     try {
+        const API_BASE = import.meta.env.VITE_API_URL; // Adjust the API base URL as needed
+
         const token = localStorage.getItem('authToken');
-        const response = await axios.post('http://localhost:8000/api/items/add-to-shop',
+        const response = await axios.post(`${API_BASE}/items/add-to-shop`,
             {
                 "count": fetch_count,
                 "recycle": recycle

@@ -15,7 +15,8 @@ const QuestPage = () => {
   const [questFinally, setQuestFinally] = useState(null); // final quest data after player choices
   const [questComplete, setQuestComplete] = useState(false); // to track if quest is complete
 
-  const API_BASE = "http://localhost:8000/api";
+  const API_BASE = import.meta.env.VITE_API_URL; // Adjust the API base URL as needed
+
 
   // Fetch quest from the DB
   const fetchQuestDB = async () => {

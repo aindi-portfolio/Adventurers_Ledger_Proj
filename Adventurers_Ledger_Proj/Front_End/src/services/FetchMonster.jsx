@@ -1,11 +1,12 @@
 import axios from "axios";
 
-const BASE_API = 'http://localhost:8000/api'
+const API_BASE = import.meta.env.VITE_API_URL; // Adjust the API base URL as needed
+
 
 // Fetch random monster based on character level
 const fetchMonster = async (characterLevel) => {
     try {
-        const response = await axios.get(`${BASE_API}/monsters/${characterLevel}`);
+        const response = await axios.get(`${API_BASE}/monsters/${characterLevel}`);
         console.log("Monster data fetched:", response.data);
         const list_length = response.data.length;
         const random_monster = Math.floor(Math.random() * list_length);
