@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Local_Hunter_Proj.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Adventurers_Ledger_Proj.settings')
 
 application = get_wsgi_application()
