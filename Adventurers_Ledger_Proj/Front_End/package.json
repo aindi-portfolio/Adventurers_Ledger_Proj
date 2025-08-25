@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "build": "vite build",
     "preview": "vite preview",
     "cy:open": "cypress open",
     "cy:run": "npx cypress run --spec"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.12",
     "autoprefixer": "^10.4.21",
     "axios": "^1.11.0",
     "bootstrap": "^5.3.7",
