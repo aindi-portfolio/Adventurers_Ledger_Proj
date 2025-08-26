@@ -31,7 +31,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))  # Load environment variabl
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'ec2-3-14-15-224.us-east-2.compute.amazonaws.com', '3.14.15.224']
 
@@ -97,11 +97,7 @@ WSGI_APPLICATION = 'Adventurers_Ledger_Proj.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'adventurers_ledger',
-        'USER': env("RDS_USER"),
-        'PASSWORD': env("RDS_PASSWORD"),
-        'HOST': env("RDS_HOST"),
-        'PORT': '5432',
+        'NAME': 'adventurers_db',
     }
 }
 

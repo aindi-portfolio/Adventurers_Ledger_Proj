@@ -27,47 +27,48 @@ class ManageCharacter(APIView):
             "rogue": {"Shortsword": 1, "Dagger": 1, "Leather Armor": 1},
         }
         
-        """
-        This post method creates a new character for the authenticated user.
-        The user can have multiple characters as long as they don't match the same name and class.
-        The character is created with a name and class, and starter items are added based on the class selection.
-        The character's inventory is populated with items fetched from the D&D API based on the class.
-        If the character already exists with the same name and class, an error is returned.
-        """
         try:
             user_account = request.user
-            # Validate user authentication
+            print(f"User account: {user_account}")
+
             if not user_account.is_authenticated:
+                print("User not authenticated")
                 return Response({"error": "User not authenticated"}, status=s.HTTP_401_UNAUTHORIZED)
 
-            # Extract character data from the request
             character_name = request.data.get('name')
             character_class = request.data.get('character_class')
+            print(f"Character name: {character_name}, Character class: {character_class}")
 
-            # Validate required fields
             if not character_name or not character_class:
+                print("Missing required fields")
                 return Response({"error": "Name and class are required fields."}, status=s.HTTP_400_BAD_REQUEST)
 
-            # Check if the user_account already has a character with the same class and name
             if Character.objects.filter(user_account=user_account, name=character_name, character_class=character_class).exists():
+                print("Character already exists")
                 return Response({"error": "Character already exists"}, status=s.HTTP_400_BAD_REQUEST)
 
-            # Get starter items for the selected class
             starter_items = STARTER_ITEMS_FOR_CLASSES.get(character_class.lower())
             if not starter_items:
+                print(f"Invalid character class: {character_class}")
                 return Response({"error": f"Invalid character class: {character_class}"}, status=s.HTTP_400_BAD_REQUEST)
 
+            print(f"Starter items for class {character_class}: {starter_items}")
 
-
-            # Create the new character
             new_character = Character.objects.create(
                 user_account=user_account,
                 name=character_name,
-                character_class=character_class,
-                inventory=starter_items  # Assuming inventory is a JSON field in the Character model
+                character_class=character_class
             )
+            print(f"New character created: {new_character}")
 
-            # Return the created character's details
+            for item_name, quantity in starter_items.items():
+                print(f"Adding {quantity} of {item_name} to inventory")
+                item_obj = Item.objects.filter(name=item_name).first()
+                if item_obj:
+                    Inventory.objects.create(character=new_character, item=item_obj, quantity=quantity)
+                else:
+                    print(f"Item {item_name} not found in database")
+
             return Response(
                 {
                     "message": "Character created successfully",
@@ -75,13 +76,14 @@ class ManageCharacter(APIView):
                         "id": new_character.id,
                         "name": new_character.name,
                         "class": new_character.character_class,
-                        "inventory": new_character.inventory,
                     },
                 },
                 status=s.HTTP_201_CREATED,
             )
 
         except Exception as e:
+            print(f"Exception occurred: {e}")
+            traceback.print_exc()
             return Response({"error": str(e)}, status=s.HTTP_500_INTERNAL_SERVER_ERROR)
         
         
