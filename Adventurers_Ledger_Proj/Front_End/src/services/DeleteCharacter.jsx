@@ -1,9 +1,9 @@
 import axios from 'axios';
 
+const API_BASE = import.meta.env.VITE_API_URL; // Adjust the API base URL as needed
+
 const handleCharacterDeath = async () => {
   try {
-    const API_BASE = import.meta.env.VITE_API_URL; // Adjust the API base URL as needed
-
     const token = localStorage.getItem('authToken');
     const response = await axios.delete(`${API_BASE}/character/manage-character`, {
       headers: {
