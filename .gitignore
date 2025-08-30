@@ -4,3 +4,4 @@ Adventurers_Ledger_Proj/Back_End/__pycache__/
 Adventurers_Ledger_Proj/Back_End/db.sqlite3
 node_modules/
 Adventurers_Ledger_Proj/Front_End/node_modules/
+__pycache__
