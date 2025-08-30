@@ -32,7 +32,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'ec2-3-14-15-224.us-east-2.compute.amazonaws.com', '3.14.15.224']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 
@@ -96,7 +96,11 @@ WSGI_APPLICATION = 'Adventurers_Ledger_Proj.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'adventurers_db',
+        'NAME': os.environ.get('DB_NAME', 'adventurers_db'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
