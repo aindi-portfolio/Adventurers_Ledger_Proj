@@ -2,14 +2,11 @@ import random
 import requests
 import json
 import os
-from dotenv import load_dotenv
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status as s
 from .models import Quest
 from .serializers import QuestSerializer
-
-load_dotenv('.env')  # Load environment variables
 
 
 # QuestView: A view to handle quest retrieval from the DB
@@ -35,7 +32,7 @@ class QuestView(APIView):
 class GenQuestView(APIView):
     def post(self, request):
         # Generate story intro using OpenRouter
-        OPENROUTER_API_KEY = os.environ.get("GEMINI_KEY")  # Update your .env key name
+        OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 
         quest_title = request.data.get("quest_title")
         quest_description = request.data.get("quest_description")
@@ -101,7 +98,7 @@ class AdvanceQuestView(APIView):
     """
 
     def post(self, request):
-        OPENROUTER_API_KEY = os.environ.get("GEMINI_KEY")  # Update your .env key name
+        OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
         
         print("Incoming Payload:", request.data)
         quest_data = request.data.get("quest") # This is the response from GenQuestView

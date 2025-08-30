@@ -1,6 +1,4 @@
 import requests
-from dotenv import load_dotenv
-load_dotenv('.env')  # Load environment variables from .env file
 import json
 import os
 from django.core.cache import cache
