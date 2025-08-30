@@ -35,7 +35,7 @@ class QuestView(APIView):
 class GenQuestView(APIView):
     def post(self, request):
         # Generate story intro using OpenRouter
-        OPENROUTER_API_KEY = os.environ.get("GEMINI_KEY")  # Update your .env key name
+        OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")  # Updated to match actual service
 
         quest_title = request.data.get("quest_title")
         quest_description = request.data.get("quest_description")
@@ -101,7 +101,7 @@ class AdvanceQuestView(APIView):
     """
 
     def post(self, request):
-        OPENROUTER_API_KEY = os.environ.get("GEMINI_KEY")  # Update your .env key name
+        OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")  # Updated to match actual service
         
         print("Incoming Payload:", request.data)
         quest_data = request.data.get("quest") # This is the response from GenQuestView

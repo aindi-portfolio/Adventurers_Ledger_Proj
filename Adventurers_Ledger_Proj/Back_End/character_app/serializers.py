@@ -18,7 +18,7 @@ class CharacterSerializer(ModelSerializer):
     #     return data
 
 class InventorySerializer(ModelSerializer):
-    player = CharacterSerializer(read_only=True)
+    character = CharacterSerializer(read_only=True)
     item = ItemSerializer(read_only=True)
     class Meta:
         model = Inventory
