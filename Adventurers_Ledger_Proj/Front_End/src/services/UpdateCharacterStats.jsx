@@ -1,9 +1,10 @@
 import axios from "axios";
 import handleCharacterDeath from "./DeleteCharacter";
 
+const API_BASE = import.meta.env.VITE_API_URL; // Adjust the API base URL as needed
+
 export default async function updateCharacterStats(health, experience=0, gold=0) {
     try {
-        const API_BASE = import.meta.env.VITE_API_URL; // Adjust the API base URL as needed
 
         if (health <= 0) {
             await handleCharacterDeath();
