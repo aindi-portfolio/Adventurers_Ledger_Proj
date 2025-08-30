@@ -15,6 +15,9 @@ class Encounter(models.Model):
     ], default='defeat')
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.player.name} vs {self.monster.name} - {self.outcome}"
+
 
 class Monster(models.Model):
     """
@@ -29,3 +32,6 @@ class Monster(models.Model):
     passive_perception = models.IntegerField(default=5) # Will be taken from senses.passive_perception from D&D API
     challenge_rating = models.FloatField(default=0) # Will be taken from challenge_rating from D&D API
     image_url = models.CharField(max_length=200, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name} (CR {self.challenge_rating})"

@@ -250,19 +250,11 @@ class InventoryManager(APIView):
             except Item.DoesNotExist:
                 return Response({"error": "Item not found"}, status=s.HTTP_404_NOT_FOUND)
 
-            # Check if item already exists in inventory
-            inventory_entry, created = Inventory.objects.get_or_create(
-                character=character,
-                item=item,
-                defaults={"quantity": quantity}
-            )
-
-            if not created:
-                inventory_entry.quantity += quantity  # Update the quantity directly
-                inventory_entry.save()  # Save the updated inventory entry
+            # Use the new class method to add item to inventory
+            inventory_entry = Inventory.add_item_to_character(character, item, quantity)
 
             serializer = InventorySerializer(inventory_entry)
-            return Response(serializer.data, status=s.HTTP_201_CREATED if created else s.HTTP_200_OK)
+            return Response(serializer.data, status=s.HTTP_201_CREATED)
 
         except Character.DoesNotExist:
             return Response({"error": "Character not found"}, status=s.HTTP_404_NOT_FOUND)
@@ -313,7 +305,7 @@ class InventoryManager(APIView):
                     # SELL: Reference from character's own inventory
                     try:
                         inventory_entry = Inventory.objects.select_related('item').get(character=character, item__name=item_name)
-                    except inventory_entry.DoesNotExist:
+                    except Inventory.DoesNotExist:
                         print(f"Inventory entry for {item_name} not found for character {character.name}.")
                         return Response({"error": "You do not own this item"}, status=s.HTTP_404_NOT_FOUND)
                     if inventory_entry.quantity < abs(quantity):

@@ -25,6 +25,9 @@ class Character(models.Model):
               Character Health: {self.health}\n
               Character Gold: {self.gold}""")
 
+    def __str__(self):
+        return f"{self.name} (Level {self.level} {self.character_class})"
+
 class Inventory(models.Model):
     """
     Inventory holds items for a character.
@@ -33,11 +36,24 @@ class Inventory(models.Model):
     item = models.ForeignKey('item_app.Item', on_delete=models.CASCADE, related_name='inventory_items')
     quantity = models.IntegerField(default=1)
 
+    @classmethod
+    def add_item_to_character(cls, character, item, quantity=1):
+        """
+        Add an item to a character's inventory or increase quantity if it already exists.
+        """
+        inventory_entry, created = cls.objects.get_or_create(
+            character=character,
+            item=item,
+            defaults={'quantity': 0}
+        )
+        inventory_entry.add(quantity)
+        return inventory_entry
+
+    def __str__(self):
+        return f"{self.character.name}'s {self.item.name} x{self.quantity}"
+
     def add(self, amount=1):
-        # Check if item already exists in the inventory, if not then call the add_item method
-        if self.item not in self.character.inventory.all():
-            self.add_item(self.item)
-            return
+        # Increase the quantity of this inventory item
         if amount < 1:
             raise ValueError("Amount must be at least 1")
         self.quantity += amount
@@ -54,17 +70,13 @@ class Inventory(models.Model):
 
     
     def add_item(self, item):
-        self.item = item
-        self.save()
-        self.quantity += 1
+        # This method should not be used on existing inventory instances
+        # Use get_or_create to add items to inventory instead
+        raise NotImplementedError("Use Inventory.objects.get_or_create() to add new items to inventory")
 
-    def delete_item(self, item):
-        # 1. Check if item (by name) is in the cart
-        # 2. If it is, remove it
-        if self.item == item:
-            self.delete()
-        else:
-            raise ValueError("Item not found in the cart")
+    def delete_item(self):
+        # Remove this inventory entry completely
+        self.delete()
 
 
 class Transaction(models.Model):
@@ -77,3 +89,6 @@ class Transaction(models.Model):
     quantity = models.IntegerField(default=1)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.character.name} {self.transaction_type} {self.quantity}x {self.item.name} for {self.total_price}"
