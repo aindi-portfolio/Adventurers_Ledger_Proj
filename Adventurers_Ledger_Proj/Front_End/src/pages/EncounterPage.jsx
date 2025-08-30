@@ -65,9 +65,10 @@ export default function EncounterPage() {
     const attack = useAttack();
 
     const handleAttack = () => {
-        const { enemyHealth, characterHealth} = attack();
-        console.log("Enemy health after attack:", enemyHealth);
-        console.log("Character health after attack:", characterHealth);
+        const attackResult = attack();
+        console.log("Attack result:", attackResult);
+        console.log("Enemy health after attack:", attackResult.enemyHealth);
+        console.log("Character health after attack:", attackResult.characterHealth);
     }
 
     return (

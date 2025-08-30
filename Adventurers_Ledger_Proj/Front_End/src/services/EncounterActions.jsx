@@ -59,9 +59,7 @@ const useAttack = () => {
         // Update state if necessary
         setEnemy({ ...enemy, health: enemy.health });
         setCharacter({ ...character, health: character.health });
-
-
-        
+        return { enemyHealth: enemy.health, characterHealth: character.health };
     };
 
     return attack;

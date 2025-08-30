@@ -8,6 +8,7 @@ from rest_framework import status as s
 from .models import Item, ShopItem
 from .serializers import ItemSerializer, ShopItemSerializer
 from .utils_EXPERIMENTAL import get_dice_average
+import trace
 
 API_BASE_URL = "https://www.dnd5eapi.co"
 
@@ -140,35 +141,46 @@ class AddItemToShopView(APIView):
         try:
             # Check for 'recycle' in the request data
             if request.data.get('recycle') == 'true':
+                print("Recycle flag is set. Deleting all items in ShopItem model.")
                 ShopItem.objects.all().delete()  # Drop all data in ShopItem model
 
-            count = int(request.data.get('count', 1))
+            count = request.data.get('fetch_count') or 1  # Default to 1 if not provided
+            print(f"Requested count: {count}")
             if count <= 0:
+                print("Count is not a positive integer.")
                 return Response({"error": "Count must be a positive integer."}, status=s.HTTP_400_BAD_REQUEST)
 
             shop_items = ShopItem.objects.all()
             if shop_items.exists():
+                print(f"Shop already has items: {shop_items.count()} items found.")
                 # If items already exist in the shop, return them
                 serializer = ShopItemSerializer(shop_items, many=True)
                 return Response(serializer.data, status=s.HTTP_200_OK)
 
+            print("Fetching items from the Item model.")
             # Fetch items from the Item model
             items = Item.objects.order_by('?')[:count]
             if not items:
+                print("No items available to add to the shop.")
                 return Response({"error": "No items available to add to the shop."}, status=s.HTTP_404_NOT_FOUND)
 
             new_shop_items = []
             for item in items:
+                print(f"Processing item: {item.name}")
                 shop_item, created = ShopItem.objects.get_or_create(
                     item=item,
-                    defaults={'quantity': 1}
+                    defaults={'stock': 1}
                 )
                 if not created:
-                    shop_item.quantity += 1
+                    print(f"Item {item.name} already exists in shop. Increasing stock quantity.")
+                    shop_item.stock += 1
                     shop_item.save()
+                else:
+                    print(f"Item {item.name} added to shop for the first time.")
                 new_shop_items.append(shop_item)
 
             serializer = ShopItemSerializer(new_shop_items, many=True)
+            print(f"Returning {len(new_shop_items)} new shop items.")
             return Response(serializer.data, status=s.HTTP_201_CREATED)
 
         except Exception as e:

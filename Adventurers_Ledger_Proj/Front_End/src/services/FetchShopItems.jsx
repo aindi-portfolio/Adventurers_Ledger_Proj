@@ -3,9 +3,10 @@ import axios from "axios";
 const fetchShopItem = async (fetch_count=1, recycle=false) => {
     try {
         const token = localStorage.getItem('authToken');
+        console.log('Fetching items with count:', fetch_count, 'and recycle:', recycle);
         const response = await axios.post('http://localhost:8000/api/items/add-to-shop',
             {
-                "count": fetch_count,
+                "fetch_count": fetch_count,
                 "recycle": recycle
             },
             {

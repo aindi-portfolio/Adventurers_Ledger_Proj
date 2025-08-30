@@ -13,9 +13,10 @@ export default function ShopPage() {
     const [shopItems, setShopItems] = useState([]);
     const [itemCount, setItemCount] = useState(0);
 
-    // Handle for fetch items from the ShotItem mode in DB
+    // Handle for fetch items from the ShopItem mode in DB
     const handleFetchShopItems = async () => {
         try {
+            // console.log("Checking item count:", itemCount); // Debug log for item count
             // Get the count of items in the shop
             // If the itemCount is less than 10, fetch items from the shop
             if (itemCount >= 10) {
@@ -23,32 +24,32 @@ export default function ShopPage() {
                 return;
             }
             let count = 10 - itemCount; // Calculate how many items to fetch
-            console.log("Fetching shop items...");
-            const data = await fetchShopItem({ fetch_count: count, recycle: false });
+            // console.log("Fetching", count, "shop items..."); // Debug log for fetch count
+            const data = await fetchShopItem(count, false);
             setShopItems(data);
             setItemCount(data.length);
-            console.log("Fetched shop items:", data);
+            // console.log("Fetched shop items:", data); // Debug log for fetched items
         } catch (error) {
             console.error("Error fetching shop items:", error);
         }
     };
 
-    //Handle force fetch items from the shop
+    // Handle force fetch items from the shop
     const handleForceFetchShopItems = async () => {
         try {
-            console.log("Force fetching shop items...");
-            const data = await fetchShopItem({ fetch_count: 10, recycle: true });
+            console.log("Force fetching shop items..."); // Debug log for force fetch
+            const data = await fetchShopItem(count, true);
             setShopItems(data);
             setItemCount(data.length);
-            console.log("Force fetched shop items:", data);
+            console.log("Force fetched shop items:", data); // Debug log for force fetched items
         } catch (error) {
             console.error("Error force fetching shop items:", error);
         }
     };
 
-
     // Fetch shop items from the API when the component mounts or when the shopItems state changes
     useEffect(() => {
+        console.log("Component mounted or itemCount changed, fetching shop items..."); // Debug log for useEffect
         handleFetchShopItems();
     }, [itemCount]);
     
