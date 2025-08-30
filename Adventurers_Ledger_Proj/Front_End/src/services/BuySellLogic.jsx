@@ -1,8 +1,8 @@
 import axios from "axios";
 // This component is responsible for handling the purchase logic for the item selected.
+const API_BASE = import.meta.env.VITE_API_URL; // Adjust the API base URL as needed
 export default async function Buy_or_Sell_Item(action, item ) {
     const token = localStorage.getItem('authToken');
-    const API_BASE = import.meta.env.VITE_API_URL; // Adjust the API base URL as needed
     try {
             let quantity = action === "buy" ? 1 : action === "sell" ? -1 : 0;
             if (quantity === 0) {
