@@ -1,3 +1,5 @@
+node_modules
+Adventurers_Ledger_Proj/Front_End/node_modules
 venv/
 .env
 *.env
